@@ -118,6 +118,7 @@ _Note that each RPi has to have a hard-wired `ROOM_ID`._
 
 #### `mqtt-1` & `mqtt-2`
 
+topics & commands
 
 #### `digital_twin`
 

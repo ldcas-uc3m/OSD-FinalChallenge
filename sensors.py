@@ -42,6 +42,39 @@ servo_pwm = GPIO.PWM(14, 50)
 
 GPIO.setwarnings(False)
 
+sensors = {
+    "temperature": {
+        "active": True,
+        "level": 0
+    },
+    "humidity": {
+        "active": True,
+        "level": 0
+    },
+    "air_conditioner": {
+        "active": True,
+        "mode": "off",  # can be hot or cold, or off
+        "level": 0
+    },
+    "blind": {
+        "active": True,
+        "level": 0
+    },
+    "inner_light": {
+        "active": True,
+        "level": 0
+    },
+    "exterior_light": {
+        "active": True,
+        "level": 0
+    },
+    "presence": {
+        "active": True,
+        "level": 0
+    }
+}
+
+
 # GLOBAL STATUS VARIABLES
 temperature = 22
 dc = 0  # AC power
@@ -185,16 +218,32 @@ def motor():
     global dc
 
     motor_pwm.start(0)
-    while (1):
+    while True:
+        # update mode (AC mode) depending on temperature
+        # set dc (level of AC) depending on termperature
+        # depending on mode, output to motor/rgb led
+
+
         if not present:
+            sensors["air_conditioner"]["active"] = False
+        elif temperature < 21:
+            dc = (21 - temperature) * 10
+            sensors["air_conditioner"]["mode"] = "hot"
+        elif temperature > 24:
+            dc = (temperature - 24) * 10
+            sensors["air_conditioner"]["mode"] = "cold"
+        else:
+            dc = 0
+            sensors["air_conditioner"]["mode"] = "off"
+
+        if sensors["air_conditioner"]["mode"] == "off":
             GPIO.output(MOTOR1A, GPIO.LOW)
             GPIO.output(MOTOR1B, GPIO.LOW)
 
-            GPIO.output(GREEN_PIN, GPIO.LOW)
+            GPIO.output(GREEN_PIN, GPIO.HIGH)
             GPIO.output(RED_PIN, GPIO.LOW)
             GPIO.output(BLUE_PIN, GPIO.LOW)
-        elif temperature < 21:
-            dc = (21 - temperature) * 10
+        elif sensors["air_conditioner"]["mode"] == "hot":
             # go reverse
             GPIO.output(MOTOR1A, GPIO.LOW)
             GPIO.output(MOTOR1B, GPIO.HIGH)
@@ -203,8 +252,7 @@ def motor():
             GPIO.output(RED_PIN, GPIO.HIGH)
             GPIO.output(BLUE_PIN, GPIO.LOW)
 
-        elif temperature > 24:
-            dc = (temperature - 24) * 10
+        elif sensors["air_conditioner"]["mode"] == "cold":
             # go forward
             GPIO.output(MOTOR1A, GPIO.HIGH)
             GPIO.output(MOTOR1B, GPIO.LOW)
@@ -212,14 +260,16 @@ def motor():
             GPIO.output(GREEN_PIN, GPIO.LOW)
             GPIO.output(RED_PIN, GPIO.LOW)
             GPIO.output(BLUE_PIN, GPIO.HIGH)
-
-        else:
-            dc = 0
+        
+        elif sensors["air_conditioner"]["active"] == False:
+            GPIO.output(MOTOR1A, GPIO.LOW)
+            GPIO.output(MOTOR1B, GPIO.LOW)
 
             GPIO.output(GREEN_PIN, GPIO.HIGH)
             GPIO.output(RED_PIN, GPIO.LOW)
             GPIO.output(BLUE_PIN, GPIO.LOW)
 
+    
         motor_pwm.ChangeDutyCycle(dc)
         time.sleep(0.5)  # so it consumes less resources
 
