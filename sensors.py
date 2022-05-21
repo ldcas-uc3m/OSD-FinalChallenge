@@ -1,5 +1,6 @@
 import sys
 import RPi.GPIO as GPIO
+import schedule
 import time
 import Adafruit_DHT
 from threading import Thread
@@ -17,7 +18,7 @@ BLUE_PIN = 18
 GREEN_PIN = 27
 BUTTON_GPIO = 16
 WHITE_PIN = 26
-BLU_PIN = 22
+BLU_PIN = 6
 SERVO_PIN = 14
 
 # GPIO SETUP
@@ -57,8 +58,7 @@ sensors = {
         "level": 0
     },
     "blind": {
-        "active": True,
-        "level": 0
+        "angle": 0
     },
     "inner_light": {
         "active": True,
@@ -76,19 +76,19 @@ sensors = {
 
 
 # GLOBAL STATUS VARIABLES
-temperature = 22
+sensors["temperature"]["level"] = 22
 dc = 0  # AC power
-present = False  # presence
+sensors["presence"]["active"] = False  # presence
 
-servo_angle = 0  # blinds
+sensors["blind"]["angle"] = 0  # blinds
 
 # exterior light
-blu_status = 1  
-blu_intensity = 10
+sensors["exterior_light"]["active"] = 1
+sensors["exterior_light"]["level"] = 10
 
 # inner light
-wh_status = 1
-wh_intensity = 10
+sensors["inner_light"]["active"] = 1
+sensors["inner_light"]["level"] = 10
 
 # MQTT
 MQTT_SERVER = "34.107.55.203"
@@ -126,18 +126,21 @@ def threads():
     t_button = Thread(target=button)
     t_motor = Thread(target=motor)
     t_sensor = Thread(target=weatherSensor)
+    t_ext_scheduler = Thread(target=ext_schedule)
     t_mqtt = Thread(target=connect_mqtt)
 
     t_button.setDaemon(True)
     t_motor.setDaemon(True)
     t_sensor.setDaemon(True)
+    t_ext_scheduler.setDaemon(True)
 
     t_button.start()
     t_motor.start()
     t_sensor.start()
     t_mqtt.start()
+    t_ext_scheduler.start()
 
-    # solo testing
+    # ##solo testing
     # t_blu2 = Thread(target=check)
     # t_blu2.setDaemon(True)
     # t_blu2.start()
@@ -152,23 +155,36 @@ def threads():
 # def check():
 #     # to be delted only for testing
 #     while True:
-#         update_servo(0)
-#         upadte_blu(0,0)
-#         upadte_white(0, 0)
+#         #update_servo(0)
+#         update_blu(0,0)
+#         #update_white(0, 0)
+def ext_on():
+    update_blu(1,100)
+def ext_off():
+    update_blu(0, 0)
+
+def ext_schedule():
+    start_time = "20:00"
+    stop_time = "06:00"
+    schedule.every().day.at(start_time).do(ext_on)
+    schedule.every().day.at(stop_time).do(ext_off)
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
 
 
 def update_servo(angle):
-    global servo_angle
+    global sensors
     # angle = float(input('Enter angle between 0 & 180: '))
-    servo_angle = angle
-    print("The angle of servo motor right now is {} \n".format(servo_angle))
+    sensors["blind"]["angle"] = angle
+    print("The angle of servo motor right now is {} \n".format(sensors["blind"]["angle"]))
     servo()
 
 
 def servo():
     servo_pwm.start(0)
     # In servo terms here, 2 means 0 and 12 means 180 degree
-    servo_pwm.ChangeDutyCycle(2 + (servo_angle / 18))
+    servo_pwm.ChangeDutyCycle(2 + (sensors["blind"]["angle"] / 18))
 
     time.sleep(0.5)
     servo_pwm.ChangeDutyCycle(0)
@@ -176,40 +192,40 @@ def servo():
 
 # we will recieve values in this funtion to update the global variable
 # Note: To turn on the light the status need to be True or 1
-def upadte_blu(status, intensity):
-    global blu_status, blu_intensity
+def update_blu(status, intensity):
+    global sensors
     # status = int(input('Enter the light status: '))
     # intensity = float(input('Enter the light Intensity: '))
-    blu_status = status
-    blu_intensity = intensity
-    print("The status of blue external lights is {} and the intensity is {}\n".format(wh_status, wh_intensity))
+    sensors["exterior_light"]["active"] = status
+    sensors["exterior_light"]["level"] = intensity
+    print("The status of blue external lights is {} and the intensity is {}\n".format(sensors["inner_light"]["active"], sensors["inner_light"]["level"]))
     blu()
 
 
 def blu():
-    global blu_status, blu_intensity
+    global sensors
     blu_pwm.start(0)
-    if blu_status:
-        blu_pwm.ChangeDutyCycle(blu_intensity)
+    if sensors["exterior_light"]["active"]:
+        blu_pwm.ChangeDutyCycle(sensors["exterior_light"]["level"])
     else:
         blu_pwm.ChangeDutyCycle(0)
 
 
 def update_white(status, intensity):
     # we will recieve values in this funtion to update the global variable
-    global wh_status, wh_intensity
+    global sensors
     # status = int(input('Enter the white light status: '))
     # intensity = float(input('Enter the white light Intensity: '))
-    wh_status = status
-    wh_intensity = intensity
-    print("The status of white internal lights is {} and the intensity is {}\n".format(wh_status, wh_intensity))
+    sensors["inner_light"]["active"] = status
+    sensors["inner_light"]["level"] = intensity
+    print("The status of white internal lights is {} and the intensity is {}\n".format(sensors["inner_light"]["active"], sensors["inner_light"]["level"]))
     white()
 
 
 def white():
     white_pwm.start(0)
-    if wh_status:
-        white_pwm.ChangeDutyCycle(wh_intensity)
+    if sensors["inner_light"]["active"]:
+        white_pwm.ChangeDutyCycle(sensors["inner_light"]["level"])
     else:
         white_pwm.ChangeDutyCycle(0)
 
@@ -219,18 +235,18 @@ def motor():
 
     motor_pwm.start(0)
     while True:
-        # update mode (AC mode) depending on temperature
+        # update mode (AC mode) depending on sensors["temperature"]["level"]
         # set dc (level of AC) depending on termperature
         # depending on mode, output to motor/rgb led
 
 
-        if not present:
+        if not sensors["presence"]["active"]:
             sensors["air_conditioner"]["active"] = False
-        elif temperature < 21:
-            dc = (21 - temperature) * 10
+        elif sensors["temperature"]["level"] < 21:
+            dc = (21 - sensors["temperature"]["level"]) * 10
             sensors["air_conditioner"]["mode"] = "hot"
-        elif temperature > 24:
-            dc = (temperature - 24) * 10
+        elif sensors["temperature"]["level"] > 24:
+            dc = (sensors["temperature"]["level"] - 24) * 10
             sensors["air_conditioner"]["mode"] = "cold"
         else:
             dc = 0
@@ -260,7 +276,7 @@ def motor():
             GPIO.output(GREEN_PIN, GPIO.LOW)
             GPIO.output(RED_PIN, GPIO.LOW)
             GPIO.output(BLUE_PIN, GPIO.HIGH)
-        
+
         elif sensors["air_conditioner"]["active"] == False:
             GPIO.output(MOTOR1A, GPIO.LOW)
             GPIO.output(MOTOR1B, GPIO.LOW)
@@ -269,22 +285,22 @@ def motor():
             GPIO.output(RED_PIN, GPIO.LOW)
             GPIO.output(BLUE_PIN, GPIO.LOW)
 
-    
+
         motor_pwm.ChangeDutyCycle(dc)
         time.sleep(0.5)  # so it consumes less resources
 
 
 def weatherSensor():
-    global temperature, humidity
+    global sensors
 
     DHT_SENSOR = Adafruit_DHT.DHT11
 
     while True:
-        if present:
+        if sensors["presence"]["active"]:
             # read sensor and time
-            humidity, temperature = Adafruit_DHT.read_retry(DHT_SENSOR, DHT_PIN)
-            if humidity is not None and temperature is not None:
-                print("Temp={0:0.1f}C".format(temperature))
+            sensors["humidity"]["level"], sensors["temperature"]["level"] = Adafruit_DHT.read_retry(DHT_SENSOR, DHT_PIN)
+            if sensors["humidity"]["level"] is not None and sensors["temperature"]["level"] is not None:
+                print("Temp={0:0.1f}C".format(sensors["temperature"]["level"]))
                 print("Power:", dc)
             else:
                 print("Sensor failing.")
@@ -298,17 +314,17 @@ def signal_handler(sig, frame):
 
 
 def button_callback():
-    global present
+    global sensors
     print("You have pressed the button")
     # toggle button (off -> on, on -> off)
-    if not present:
-        present = True
+    if not sensors["presence"]["active"]:
+        sensors["presence"]["active"] = True
     else:
-        present = False
+        sensors["presence"]["active"] = False
 
 
 def button():
-    global present
+    global sensors
     GPIO.setup(BUTTON_GPIO, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     pressed = False
     while True:
@@ -332,7 +348,7 @@ def on_connect(client, userdata, flags, rc):
 
 
 def on_message(client, userdata, msg):
-    global temperature, dc, present, servo_angle, blu_status, blu_intensity, wh_status, wh_intensity
+    global sensors, dc
 
     print("Message received in MQTT-2 with topic", msg.topic, "and message", msg.payload.decode())
 
@@ -340,7 +356,7 @@ def on_message(client, userdata, msg):
     if topic[-1] == "air-conditioner":
         print("Air conditioner command received:", msg.payload.decode())
         # TODO
-            
+
 
 def connect_mqtt():
     client = mqtt.Client()
@@ -352,13 +368,13 @@ def connect_mqtt():
     client.loop_start()  # listen for commands
 
     while True:
-        client.publish(TEMPERATURE_TOPIC, payload=temperature, qos=0, retain=False)
-        client.publish(HUMIDITY_TOPIC, payload=humidity, qos=0, retain=False)
-        client.publish(IN_LIGHT_TOPIC, payload=wh_intensity, qos=0, retain=False)
-        client.publish(EX_LIGHT_TOPIC, payload=blu_intensity, qos=0, retain=False)
+        client.publish(TEMPERATURE_TOPIC, payload=sensors["temperature"]["level"], qos=0, retain=False)
+        client.publish(HUMIDITY_TOPIC, payload=sensors["humidity"]["level"], qos=0, retain=False)
+        client.publish(IN_LIGHT_TOPIC, payload=sensors["inner_light"]["level"], qos=0, retain=False)
+        client.publish(EX_LIGHT_TOPIC, payload=sensors["exterior_light"]["level"], qos=0, retain=False)
         client.publish(AIR_TOPIC, payload=dc, qos=0, retain=False)
-        client.publish(PRESENCE_TOPIC, payload=present, qos=0, retain=False)
-        client.publish(BLINDS_TOPIC, payload=servo_angle, qos=0, retain=False)
+        client.publish(PRESENCE_TOPIC, payload=sensors["presence"]["active"], qos=0, retain=False)
+        client.publish(BLINDS_TOPIC, payload=sensors["blind"]["angle"], qos=0, retain=False)
         print("Sent to sensor data to topic", TELEMETRY_TOPIC)
 
     client.loop_stop()
