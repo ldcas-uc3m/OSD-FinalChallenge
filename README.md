@@ -19,15 +19,17 @@ Implementation of an IOT solution for a Smart Hotel.
         6. [Webapp Backend/ReST API](#webapp-backendrest-api)
         7. [Frontend](#frontend)
     2. [Implementation](#implementation)
-        1. [raspberry](#raspberry)
-        2. [digital_raspberry](#digitalraspberry)
-        3. [mqtt-1` & `mqtt-2](#mqtt-1--mqtt-2)
-        4. [digital_twin](#digitaltwin)
-        5. [message_router](#digitaltwin)
-        6. [mariaDB](#mariadb)
-        7. [adminer](#adminer)
-        8. [data_ingestion_microservice](#dataingestionmicroservice)
-        9. [frontend](#frontend)
+        1. [`raspberry`](#raspberry)
+        2. [`digital_raspberry`](#digitalraspberry)
+        3. [`mqtt-1` & `mqtt-2`](#mqtt-1--mqtt-2)
+            1. [Topics](#topics)
+            2. [Subscriptions](#subscriptions)
+        4. [`digital_twin`](#digitaltwin)
+        5. [`message_router`](#digitaltwin)
+        6. [`mariaDB`](#mariadb)
+        7. [`adminer`](#adminer)
+        8. [`data_ingestion_microservice`](#dataingestionmicroservice)
+        9. [`frontend`](#frontend)
 3. [Execution](#execution)
 4. [Use, debugging & other commands](#use-debugging--other-commands)
     1. [MariaDB](#mariadb)
@@ -71,7 +73,7 @@ In order to configure the room, that is, to get its room id, they publish their 
 #### Message Router
 The message router gets the information from the Digital Twins and sends it to de Data Ingestion ReST API.  
 It is also in charge of configuring, and saving, the room ids for the Digital Twins, waiting for the message and subscribing to the topic `hotel/rooms/+/config`, and publishing the id in `hotel/rooms/<hostname>/config/rooms`.  
-And finally, it relays the commands from the backend through `hotel/rooms/<room_id>/command/<command>`.
+And finally, it relays the commands from the backend through `hotel/rooms/<room_id>/command/<command>`. For this, it also implements a small ReST API inside it.
 
 #### Data Ingestion microservice/ReST API
 This microservice receives the data from the message router and storing it in the MariaDB.  
@@ -114,11 +116,61 @@ Each 5 seconds, regardless of presence, the raspberry sends all of its device/se
 _Note that each RPi has to have a hard-wired `ROOM_ID`._
 
 #### `digital_raspberry`
-
+This is not used in the final implementation (that's why it's commented out on the docker-compose), but it's quite useful for testing purposes.  
+It emulates the Raspberry Pies, generating random device/sensor data and sending it to the MQTT-2, as a real RPi would do.
 
 #### `mqtt-1` & `mqtt-2`
 
-topics & commands
+##### Topics
+The topics implemented on the MQTTs are the following:
+- Config: `hotel/rooms/<id>/config` (only MQTT-1)  
+This topic is used as a "handshake" between a Digital Twin and the Message Router, in order to get assigned a room id.  
+The Digital Twin sends its id (docker container id) when it's connected.
+    - `/rooms`: When the Message router receives
+- Telemetry: `hotel/rooms/<room>/telemetry`  
+sdf
+    - `/temperature`:  
+    Pakage structure: `{ "value": <int (ºC)> }`
+    - `/humidity`:  
+    Pakage structure: `{ "value": <int (%)> }`
+    - `/presence`:  
+    Pakage structure: `{ "value": <bool> }`
+    - `/blinds`:  
+    Pakage structure: `{ "value": <int (%)> }`
+    - `/temperature`:  
+    Pakage structure: `{ "value": <int (ºC)> }`
+    - `/air`: hkjhf  
+    Pakage structure: `{ "mode": <"cold" | "hot" | "off">, "value": <int from 0 to 100 (%)> }`
+    - `/inner-light`: hkjhf  
+    Pakage structure: `{ "mode": <bool>, "value": <int from 0 to 100 (%)> }`
+    - `/exterior-light`: hkjhf  
+    Pakage structure: `{ "mode": <bool>, "value": <int from 0 to 100 (%)> }`
+
+- Commands: `hotel/rooms/<room>/command`  
+These commands are sent from the frontend to the RPis, in order to change the behaviour of its devices.
+    - `/air-mode`: Change the air conditioner mode (cold, hot, off)  
+    Pakage structure: `{ "mode": <"cold" | "hot" | "off"> }`
+    - `/air-level`: Change the air conditioner intensity  
+    Pakage structure: `{ "level": <int from 0 to 100 (%)> }`
+    - `/blinds`: Change the value of the blinds  
+    Pakage structure: `{ "level": <int from 0 to 180 (º)> }`
+    - `/inner-light-mode`: Change the mode of the inner light (on/off)  
+    Pakage structure: `{ "mode": <bool> }`
+    - `/inner-light-level`: Change the intensity of the inner light  
+    Pakage structure: `{ "level": <int from 0 to 100 (%)> }`
+    - `/exterior-light-mode`: Change the mode of the exterior light (on/off)  
+    Pakage structure: `{ "mode": <bool> }`
+    - `/exterior-light-level`: Change the intensity of the exterior light  
+    Pakage structure: `{ "level": <int from 0 to 100 (%)> }`
+
+##### Subscriptions
+Each client is subscribed to different topics, as such:
+- MQTT-1:
+    - `message_router`: `hotel/rooms/+/config`, `hotel/rooms/+/telemetry/+`
+    - `digital_twin`: `hotel/rooms/<id>/config/rooms`, `hotel/rooms/<room_id>/command/+`
+- MQTT-2:
+    - `raspberry`/`digital_raspberry`: `hotel/rooms/<room_id>/command/+`
+    - `digital_twin`: `hotel/rooms/<room_id>/telemetry/+`
 
 #### `digital_twin`
 
@@ -137,6 +189,22 @@ topics & commands
 
 #### `frontend`
 
+In order to send commands to the RPi, the frontend sends JSONs to the backend.  
+The formats, depending on the action, are the following:
+- `#air_mode`: Change the air conditioner mode (cold, hot, off)  
+Pakage structure: `{ "room": <roomID>, "type": "air-conditioner-mode", "value": <"cold" | "hot" | "off"> }`
+- `#air_level`: Change the air conditioner intensity  
+Pakage structure: `{ "room": <roomID>, "type": "air-conditioner-level", "value": <int from 0 to 100 (%)> }`
+- `#blinds`: Change the value of the blinds  
+Pakage structure: `{ "room": <roomID>, "type": "blinds", "value": <int from 0 to 180 (º)> }`
+- `#inner_light_mode`: Change the mode of the inner light (on/off)  
+Pakage structure: `{ "room": <roomID>, "type": "inner-light-mode", "value": <bool> }`
+- `#inner_light_level`: Change the intensity of the inner light  
+Pakage structure: `{ "room": <roomID>, "type": "inner-light-level", "value": <int from 0 to 100 (%)> }`
+- `#exterior_light_mode`: Change the mode of the exterior light (on/off)  
+Pakage structure: `{ "room": <roomID>, "type": "exterior-light-mode", "value": <bool> }`
+- `#exterior_light_level`: Change the intensity of the exterior light  
+Pakage structure: `{ "room": <roomID>, "type": "exterior-light-level", "value": <int from 0 to 100 (%)> }`
 
 
 ## Execution
@@ -146,7 +214,7 @@ We need 2 machines (running Debian) to implement this: one for DigitalTwin, and 
 ```bash
 sudo apt update && sudo apt upgrade
 sudo apt install docker docker-compose -y
-sudo usermod -aG docker $USER  # not explicitly needed, but reccomended
+sudo usermod -aG docker $USER  # not explicitly needed, but recommended
 ```
 2. Update the RPi and install pip
 ```bash
@@ -154,7 +222,7 @@ sudo apt update && sudo apt upgrade
 sudo apt install pip -y
 ```
 3. Copy the IP address of the machine that will hold the IOTServices into `DigitalTwin/docker-compose.yaml` (`MQTT_SERVER_ADDRESS` enviroment variable).
-4. Make sure port `1883` (MQTT-1) and `1884` (MQTT-2) are open on all machines, and ports `5000` (Flask), `3306` (mariaDB), `8080` (adminer) and `80` (http) are open on the IOTServices machine.
+4. Make sure port `1883` (MQTT-1) and `1884` (MQTT-2) are open on all machines, and ports `5000` (Data Ingestion ReST API), `5001` (Webapp Backend ReST API), `5002` (Message Router ReST API), `3306` (mariaDB), `8080` (adminer) and `80` (http) are open on the IOTServices machine.
 5. Setup the circuit on the Raspberry Pi, as such:  
 
 ![Raspberry Pi circuit diagram](img/RPi_diagram.png)  

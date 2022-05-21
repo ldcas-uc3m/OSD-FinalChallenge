@@ -1,0 +1,21 @@
+/*
+ * Style sheets file to implement layout for 
+ * Operating Systems Desing exercises.
+ */
+table#rooms td{
+    background-color: #b6d1ed;
+    border: 4px solid #ffffff;
+    text-align: center;
+    padding: 11px;
+    color: #08429899;
+    font-weight: bold;
+    width: 80px;
+    height: 80px;
+}
+
+table#rooms td:hover {
+    border: 3px solid #999;
+    background-color: #CCC;
+    cursor: pointer;
+}
+

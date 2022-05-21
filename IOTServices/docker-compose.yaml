@@ -1,0 +1,102 @@
+version: '2'
+
+services:
+
+  mqtt-1:
+    build: ./MQTT
+    ports:
+      - 1883:1883
+    volumes:
+      - ./MQTT/app/mosquitto.conf:/etc/mosquitto/mosquitto.conf
+
+  mqtt-2:
+    build: ./MQTT
+    ports:
+      - 1884:1883
+    volumes:
+      - ./MQTT/app/mosquitto.conf:/etc/mosquitto/mosquitto.conf
+  
+  message_router:
+    build: ./message_router
+    environment:
+      - MQTT_USER=dso_server
+      - MQTT_PASSWORD=dso_password
+      - MQTT_SERVER_ADDRESS=mqtt-1
+      - MQTT_SERVER_PORT=1883
+      - DATA_INGESTION_API_ADDRESS=data_ingestion_microservice
+      - DATA_INGESTION_API_PORT=5000
+      - MESSAGE_ROUTER_API_HOST=0.0.0.0
+      - MESSAGE_ROUTER_API_PORT=5002
+      - PYTHONBUFFERED=1
+    ports:
+      - 5002:5000
+    volumes:
+      - ./message_router/app:/etc/usr/src/app
+    depends_on:
+      - mqtt-1
+      - mqtt-2
+      - data_ingestion_microservice
+
+  mariaDB:
+    image: "mariadb:latest"  # no Dockerfile needed, as we don't need to run config
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=dso_db_root_password  # set root password
+      - MYSQL_DATABASE=dso_db  # create database on startup
+      - MYSQL_USER=dso_db_user  # add user
+      - MYSQL_PASSWORD=dso_db_password
+    volumes:
+      - ./mariaDB/data:/var/lib/mysql  # save table data
+      - ./mariaDB/scripts:/docker-entrypoint-initdb.d  # scripts to be run on startup
+
+  adminer:  # mariaDB web interface
+    image: adminer
+    restart: unless-stopped
+    ports:
+      - 8080:8080
+    depends_on:
+      - mariaDB
+
+  data_ingestion_microservice:
+    build: ./data_ingestion_microservice
+    ports:
+      - 5000:5000  # for Flask
+    links: 
+      - "mariaDB:mariaDB"  # to be able to call mariaDB (IP) from the container
+    depends_on:
+      - mariaDB
+    environment:
+      - HOST=0.0.0.0
+      - PORT=5000
+      - DB_HOST=mariaDB
+      - DB_USER=dso_db_user
+      - DB_PASSWORD=dso_db_password
+      - DB_NAME=dso_db
+    volumes:
+      - ./data_ingestion_microservice/app:/etc/usr/src/app
+  
+  frontend:
+    build: ./frontend
+    ports:
+      - 80:80
+    volumes:
+      - ./frontend/app:/usr/local/apache2/htdocs
+    depends_on:
+      - webapp_backend
+      
+  webapp_backend: 
+    build: ./webapp_backend
+    ports:
+      - 5001:5000
+    environment:
+      - HOST=0.0.0.0
+      - PORT=5000
+      - DATA_INGESTION_API_ADDRESS=data_ingestion_microservice
+      - DATA_INGESTION_API_PORT=5000
+      - MESSAGE_ROUTER_API_ADDRESS=message_router
+      - MESSAGE_ROUTER_API_PORT=5002
+    volumes:
+      - ./webapp_backend/app:/etc/usr/src/app
+    depends_on:
+      - data_ingestion_microservice

@@ -1,0 +1,25 @@
+version: '2'
+
+services:
+  digital_twin:
+    build: ./digital_twin
+    environment:
+      - MQTT_SERVER_ADDRESS=34.159.181.215
+      - MQTT_1_SERVER_PORT=1883
+      - MQTT_2_SERVER_PORT=1884
+      - MQTT_USERNAME=dso_server
+      - MQTT_PASSWORD=dso_password
+      - PYTHONBUFFERED=1
+    volumes:
+      - ./digital_twin/app:/etc/usr/src/app
+
+  # digital_raspberry:
+  #   build: ./digital_raspberry
+  #   environment:
+  #     - MQTT_SERVER_ADDRESS=34.159.181.215
+  #     - MQTT_SERVER_PORT=1884
+  #     - MQTT_USERNAME=dso_server
+  #     - MQTT_PASSWORD=dso_password
+  #     - PYTHONBUFFERED=1
+  #   volumes:
+  #     - ./digital_raspberry/app:/etc/usr/src/app
