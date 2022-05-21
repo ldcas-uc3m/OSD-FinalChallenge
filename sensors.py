@@ -1,12 +1,10 @@
-import signal
 import sys
 import RPi.GPIO as GPIO
 import time
 import Adafruit_DHT
-import datetime
-from datetime import date
-from openpyxl import load_workbook
-from threading import Thread, Semaphore
+from threading import Thread
+import paho.mqtt.client as mqtt
+
 
 # CONSTANTS
 MOTOR1A = 24
@@ -18,52 +16,75 @@ RED_PIN = 17
 BLUE_PIN = 18
 GREEN_PIN = 27
 BUTTON_GPIO = 16
-# New_add********************************
 WHITE_PIN = 26
 BLU_PIN = 22
 SERVO_PIN = 14
-# ****************************************
 
-# setup
+# GPIO SETUP
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(MOTOR1A, GPIO.OUT)
 GPIO.setup(MOTOR1B, GPIO.OUT)
 GPIO.setup(MOTOR1E, GPIO.OUT)
-pwm = GPIO.PWM(MOTOR1E, 100)
 
 GPIO.setup(RED_PIN, GPIO.OUT)
 GPIO.setup(BLUE_PIN, GPIO.OUT)
 GPIO.setup(GREEN_PIN, GPIO.OUT)
-# New_add**********************************************
 GPIO.setup(BLU_PIN, GPIO.OUT)
 GPIO.setup(WHITE_PIN, GPIO.OUT)
 GPIO.setup(SERVO_PIN, GPIO.OUT)
-blu_pwm = GPIO.PWM(BLU_PIN, 100)
-white_pwm = GPIO.PWM(WHITE_PIN, 100)
+
+# Pulse Width Modulation
+motor_pwm = GPIO.PWM(MOTOR1E, 100)
+blu_pwm = GPIO.PWM(BLU_PIN, 100)  # for exterior light
+white_pwm = GPIO.PWM(WHITE_PIN, 100)  # for inner light
 servo_pwm = GPIO.PWM(14, 50)
-# ****************************************************
 
 
 GPIO.setwarnings(False)
+
+# GLOBAL STATUS VARIABLES
 temperature = 22
-dc = 0
-present = 0
+dc = 0  # AC power
+present = False  # presence
 
+servo_angle = 0  # blinds
 
-
-# new add**********************************************
-blu_status = 1
+# exterior light
+blu_status = 1  
 blu_intensity = 10
+
+# inner light
 wh_status = 1
 wh_intensity = 10
-servo_angle = 0
-# ***********************************************
+
+# MQTT
+MQTT_SERVER = "34.107.55.203"
+MQTT_PORT = 1884
+MQTT_USER = "dso_server"
+MQTT_PASSWORD = "dso_password"
+
+ROOM_ID = "Room1"
+
+COMMAND_TOPIC = "hotel/rooms/" + ROOM_ID + "/command"
+TELEMETRY_TOPIC = "hotel/rooms/" + ROOM_ID + "/telemetry"
+TEMPERATURE_TOPIC = TELEMETRY_TOPIC + "/temperature"
+HUMIDITY_TOPIC = TELEMETRY_TOPIC + "/humidity"
+AIR_TOPIC = TELEMETRY_TOPIC + "/air-conditioner"
+IN_LIGHT_TOPIC = TELEMETRY_TOPIC + "/inner-light"
+EX_LIGHT_TOPIC = TELEMETRY_TOPIC + "/exterior-light"
+PRESENCE_TOPIC = TELEMETRY_TOPIC + "/presence"
+BLINDS_TOPIC = TELEMETRY_TOPIC + "/blind"
+
+
+# ---
+# RPi functions
+# ---
 
 def destroy():
-    pwm.stop()
-    blu_pwm.stop()  # **********
-    white_pwm.stop()  # ****************
-    servo_pwm.stop()  # ****************
+    motor_pwm.stop()
+    blu_pwm.stop()
+    white_pwm.stop()
+    servo_pwm.stop()
     GPIO.cleanup()
 
 
@@ -72,6 +93,7 @@ def threads():
     t_button = Thread(target=button)
     t_motor = Thread(target=motor)
     t_sensor = Thread(target=weatherSensor)
+    t_mqtt = Thread(target=connect_mqtt)
 
     t_button.setDaemon(True)
     t_motor.setDaemon(True)
@@ -80,49 +102,41 @@ def threads():
     t_button.start()
     t_motor.start()
     t_sensor.start()
-    # ------------------------------------------------------------------------
-    # to delete
+    t_mqtt.start()
+
     # solo testing
-    t_blu2 = Thread(target=check)
-    t_blu2.setDaemon(True)
-    t_blu2.start()
-    t_blu2.join()
-    # -------------------------------------------------------------------------
+    # t_blu2 = Thread(target=check)
+    # t_blu2.setDaemon(True)
+    # t_blu2.start()
+    # t_blu2.join()
+
     t_button.join()
     t_motor.join()
     t_sensor.join()
+    t_mqtt.join()
 
 
-# -------------------------------------------------------
-# to be delted only for testing
-def check():
-    while True:
-        # update_servo(0)
-        # upadte_blu(0,0)
-        upadte_white(0, 0)
-
-
-# -------------------------------------------------------
+# def check():
+#     # to be delted only for testing
+#     while True:
+#         update_servo(0)
+#         upadte_blu(0,0)
+#         upadte_white(0, 0)
 
 
 def update_servo(angle):
     global servo_angle
-    # to be delted only for testing (for next line only)
-    angle = float(input('Enter angle between 0 & 180: '))
+    # angle = float(input('Enter angle between 0 & 180: '))
     servo_angle = angle
-    status_servo()
+    print("The angle of servo motor right now is {} \n".format(servo_angle))
     servo()
 
 
-def status_servo():
-    print("The angle of servo motor right now is {} \n".format(servo_angle))
-
-
-# In servo terms here, 2 means 0 and 12 means 180 degree
 def servo():
     servo_pwm.start(0)
-    global servo_angle
+    # In servo terms here, 2 means 0 and 12 means 180 degree
     servo_pwm.ChangeDutyCycle(2 + (servo_angle / 18))
+
     time.sleep(0.5)
     servo_pwm.ChangeDutyCycle(0)
 
@@ -131,66 +145,55 @@ def servo():
 # Note: To turn on the light the status need to be True or 1
 def upadte_blu(status, intensity):
     global blu_status, blu_intensity
-    # to be delted only for testing (for next 2 line only)
-    status = int(input('Enter the light status: '))
-    intensity = float(input('Enter the light Intensity: '))
+    # status = int(input('Enter the light status: '))
+    # intensity = float(input('Enter the light Intensity: '))
     blu_status = status
     blu_intensity = intensity
-    status_blu()
-    blu()
-
-
-def status_blu():
     print("The status of blue external lights is {} and the intensity is {}\n".format(wh_status, wh_intensity))
+    blu()
 
 
 def blu():
     global blu_status, blu_intensity
     blu_pwm.start(0)
-    if blu_status == True:
+    if blu_status:
         blu_pwm.ChangeDutyCycle(blu_intensity)
-    elif blu_status == False:
+    else:
         blu_pwm.ChangeDutyCycle(0)
 
 
-# we will recieve values in this funtion to update the global variable
-def upadte_white(status, intensity):
+def update_white(status, intensity):
+    # we will recieve values in this funtion to update the global variable
     global wh_status, wh_intensity
-    # to be delted only for testing (for next 2 line only)
-    status = int(input('Enter the white light status: '))
-    intensity = float(input('Enter the white light Intensity: '))
+    # status = int(input('Enter the white light status: '))
+    # intensity = float(input('Enter the white light Intensity: '))
     wh_status = status
     wh_intensity = intensity
-    status_white()
+    print("The status of white internal lights is {} and the intensity is {}\n".format(wh_status, wh_intensity))
     white()
 
 
-def status_white():
-    print("The status of white internal lights is {} and the intensity is {}\n".format(wh_status, wh_intensity))
-
-
 def white():
-    global wh_status, wh_intensity
     white_pwm.start(0)
-    if wh_status == True:
+    if wh_status:
         white_pwm.ChangeDutyCycle(wh_intensity)
-    elif wh_status == False:
+    else:
         white_pwm.ChangeDutyCycle(0)
 
 
 def motor():
-    global temperature, dc, present
+    global dc
 
-    pwm.start(0)
+    motor_pwm.start(0)
     while (1):
-        if (present == 0):
+        if not present:
             GPIO.output(MOTOR1A, GPIO.LOW)
             GPIO.output(MOTOR1B, GPIO.LOW)
 
             GPIO.output(GREEN_PIN, GPIO.LOW)
             GPIO.output(RED_PIN, GPIO.LOW)
             GPIO.output(BLUE_PIN, GPIO.LOW)
-        elif (temperature < 21 and present == 1):
+        elif temperature < 21:
             dc = (21 - temperature) * 10
             # go reverse
             GPIO.output(MOTOR1A, GPIO.LOW)
@@ -200,7 +203,7 @@ def motor():
             GPIO.output(RED_PIN, GPIO.HIGH)
             GPIO.output(BLUE_PIN, GPIO.LOW)
 
-        elif (temperature > 24 and present == 1):
+        elif temperature > 24:
             dc = (temperature - 24) * 10
             # go forward
             GPIO.output(MOTOR1A, GPIO.HIGH)
@@ -217,16 +220,17 @@ def motor():
             GPIO.output(RED_PIN, GPIO.LOW)
             GPIO.output(BLUE_PIN, GPIO.LOW)
 
-        pwm.ChangeDutyCycle(dc)
+        motor_pwm.ChangeDutyCycle(dc)
         time.sleep(0.5)  # so it consumes less resources
 
 
 def weatherSensor():
-    global temperature, dc, present
+    global temperature, humidity
+
     DHT_SENSOR = Adafruit_DHT.DHT11
 
     while True:
-        if (present == 1):
+        if present:
             # read sensor and time
             humidity, temperature = Adafruit_DHT.read_retry(DHT_SENSOR, DHT_PIN)
             if humidity is not None and temperature is not None:
@@ -246,10 +250,11 @@ def signal_handler(sig, frame):
 def button_callback():
     global present
     print("You have pressed the button")
-    if (present == 0):
-        present = 1
-    elif (present == 1):
-        present = 0
+    # toggle button (off -> on, on -> off)
+    if not present:
+        present = True
+    else:
+        present = False
 
 
 def button():
@@ -268,11 +273,49 @@ def button():
         time.sleep(0.1)
 
 
+# ---
+# MQTT
+# ---
+def on_connect(client, userdata, flags, rc):
+    print("Raspberry connected to MQTT-2")
+    client.subscribe(COMMAND_TOPIC)
+
+
+def on_message(client, userdata, msg):
+    global temperature, dc, present, servo_angle, blu_status, blu_intensity, wh_status, wh_intensity
+
+    print("Message received in MQTT-2 with topic", msg.topic, "and message", msg.payload.decode())
+
+    topic = (msg.topic).split("/")
+    if topic[-1] == "air-conditioner":
+        print("Air conditioner command received:", msg.payload.decode())
+        # TODO
+            
+
+def connect_mqtt():
+    client = mqtt.Client()
+    client.username_pw_set(username=MQTT_USER, password=MQTT_PASSWORD)
+    client.on_connect = on_connect
+    client.on_message = on_message
+    client.connect(MQTT_SERVER, MQTT_PORT, 60)
+
+    client.loop_start()  # listen for commands
+
+    while True:
+        client.publish(TEMPERATURE_TOPIC, payload=temperature, qos=0, retain=False)
+        client.publish(HUMIDITY_TOPIC, payload=humidity, qos=0, retain=False)
+        client.publish(IN_LIGHT_TOPIC, payload=wh_intensity, qos=0, retain=False)
+        client.publish(EX_LIGHT_TOPIC, payload=blu_intensity, qos=0, retain=False)
+        client.publish(AIR_TOPIC, payload=dc, qos=0, retain=False)
+        client.publish(PRESENCE_TOPIC, payload=present, qos=0, retain=False)
+        client.publish(BLINDS_TOPIC, payload=servo_angle, qos=0, retain=False)
+        print("Sent to sensor data to topic", TELEMETRY_TOPIC)
+
+    client.loop_stop()
+
+
 if __name__ == "__main__":
     try:
-        status_blu()
-        status_white()
-        status_servo()
         threads()
 
     except KeyboardInterrupt:
