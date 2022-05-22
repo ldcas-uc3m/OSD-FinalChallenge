@@ -11,6 +11,7 @@ var get_current_sensor_data = function() {
           $("#"+item.room).data(item.type, item.value)
       });
     });
+    console.log("got " + data)
 }
 
 var draw_rooms = function(){

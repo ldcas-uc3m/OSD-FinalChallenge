@@ -23,7 +23,8 @@ def device_state():
     elif request.method == 'GET':
         print("Received GET request. Forwarding to Data Ingestion", file=os.sys.stderr)
         r = requests.get(DATA_INGESTION_API_URL+"/device_state")
-        print("Response from Data Ingestion received:", json.dumps(r.json()), "\n Sending to frontend", file=os.sys.stderr)
+        # print("Response from Data Ingestion received:", json.dumps(r.json()), "\n Sending to frontend", file=os.sys.stderr)
+        print("Response from Data Ingestion received. Sending to frontend", file=os.sys.stderr)
         return json.dumps(r.json()), r.status_code
 
 
