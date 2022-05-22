@@ -68,6 +68,7 @@ def randomize_sensors():
         "active": True if random.randint(0, 1) == 1 else False,
         "level": random.randint(40, 80)
         }
+        # TODO: update
     }
     print("Set randomized sensors")
     threading.Timer(RANDOMIZE_SENSORS_INTERVAL, randomize_sensors).start()  # to continuously generate data
@@ -106,7 +107,7 @@ if __name__ == "__main__":
         # we need to convert data to JSON so it's binarizable and can be sent to the server
         json_temperature = json.dumps({"active": sensors["temperature"]["active"], "value": sensors["temperature"]["level"] })
         json_humidity = json.dumps({ "active": sensors["humidity"]["active"], "value": sensors["humidity"]["level"] })
-
+        # TODO: update
         # send data
         client.publish(TEMPERATURE_TOPIC, payload = json_temperature, qos = 0, retain = False)
         client.publish(HUMIDITY_TOPIC, payload = json_humidity, qos = 0, retain = False)

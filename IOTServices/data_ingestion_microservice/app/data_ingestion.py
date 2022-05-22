@@ -37,3 +37,10 @@ def insert_device_state(params):
         print("Data saved to database")
 
         return mycursor
+
+
+def get_device_state(params):
+    # TODO (https://pynative.com/python-mysql-select-query-to-fetch-data/)
+    mydb = connect_database()
+
+    return

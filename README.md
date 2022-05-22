@@ -221,7 +221,7 @@ sudo usermod -aG docker $USER  # not explicitly needed, but recommended
 sudo apt update && sudo apt upgrade
 sudo apt install pip -y
 ```
-3. Copy the IP address of the machine that will hold the IOTServices into `DigitalTwin/docker-compose.yaml` (`MQTT_SERVER_ADDRESS` enviroment variable).
+3. Copy the IP address of the machine that will hold the IOTServices into `DigitalTwin/docker-compose.yaml` (`MQTT_SERVER_ADDRESS` enviroment variable), and into the `api_server_address` variable inside `IOTServices/frontend/js_lib.js`.
 4. Make sure port `1883` (MQTT-1) and `1884` (MQTT-2) are open on all machines, and ports `5000` (Data Ingestion ReST API), `5001` (Webapp Backend ReST API), `5002` (Message Router ReST API), `3306` (mariaDB), `8080` (adminer) and `80` (http) are open on the IOTServices machine.
 5. Setup the circuit on the Raspberry Pi, as such:  
 

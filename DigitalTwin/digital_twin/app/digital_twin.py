@@ -1,4 +1,3 @@
-from email.message import _PayloadType
 import subprocess
 import time
 import threading
