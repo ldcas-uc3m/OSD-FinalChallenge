@@ -55,7 +55,7 @@ def get_device_state():
                 "date": str(date)
             })
         mydb.close()
-    return json.dumps(r, sort_keys=True)
+    return r
 
     # response = {}
     # with mydb.cursor() as mycursor:
