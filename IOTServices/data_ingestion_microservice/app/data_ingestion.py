@@ -36,9 +36,8 @@ def insert_device_state(params):
         mycursor.execute(sql, values)  # run query
 
         mydb.commit()
-        mydb.close()
 
-        return mycursor
+    return mycursor
 
 
 def get_device_state():
@@ -63,5 +62,4 @@ def get_device_state():
                 else:
                     response[room][device] = None
 
-        mydb.close()
-        return response
+    return response
