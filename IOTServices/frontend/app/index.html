@@ -57,17 +57,13 @@
           <div class="modal-body">
             <ul class="list-group">
               <li class="list-group-item">
+                Room number  &nbsp;<span class="badge bg-success" id="Room_value"></span>
+              </li>
+              <li class="list-group-item">
                 Temperature &nbsp;<span class="badge bg-success" id="temperature_value"></span>
               </li>
               <li class="list-group-item">
-                Presence &nbsp;<span class="badge bg-success" id="presence_value"></span>                
-              </li>
-              <li class="list-group-item">
                 Occupied &nbsp;<span class="badge bg-success" id="my_presence_value"></span> 
-              </li>
-              <li class="list-group-item">
-                Presence &nbsp;<span class="badge bg-success" id="presence_value"></span>                
-              </li>
               <li class="list-group-item">
                 Air conditioner | Power &nbsp;<span class="badge bg-success" id="air_value"></span>
                 &nbsp;&nbsp;
@@ -78,6 +74,37 @@
                     <option value="1">Warm</option>
                     <option value="2">Off</option>
                   </select>
+              <li class="list-group-item">
+                  Interior light &nbsp;<span class="badge bg-success" id="Inerior_light"></span>
+                  &nbsp;&nbsp;
+                  <label>Mode
+                    <select id="Inerior_light_mode">
+                      <option></option>
+                      <option value="0">Off</option>
+                      <option value="1">On</option>
+                    </select>
+                    <span class="badge bg-success" id="inner_light_level"></span>  
+              <li class="list-group-item">
+                  External light &nbsp;<span class="badge bg-success" id="External_light"></span>
+                    &nbsp;&nbsp;
+                    <label>Mode
+                      <select id="exterior_light_mode">
+                        <option></option>
+                        <option value="0">Off</option>
+                        <option value="1">On</option>
+                        </select>
+                        <span class="badge bg-success" id="exterior_light_level"></span>   
+              <li class="list-group-item">
+                  Blind &nbsp;<span class="badge bg-success" id="Blind"></span>
+                    &nbsp;&nbsp;
+                    <label>Mode
+                      <select id="Inerior_light_mode">
+                        <option></option>
+                        <option value="0">Closed</option>
+                        <option value="1">Open</option>
+                        </select>
+                        <span class="badge bg-success" id="Blind_level"></span>                                              
+                  </label> 
                 </label> 
               </li>
             </ul>
