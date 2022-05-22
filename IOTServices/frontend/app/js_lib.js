@@ -5,7 +5,8 @@
  var api_server_address = "34.159.103.125"
 
  var get_current_sensor_data = function(){
-    $.getJSON( "http://" + api_server_address + ":5001/device_state", function( data ) {
+    $.getJSON( "http://" + api_server_address + ":5001", function( data ) {
+    // $.getJSON( "http://" + api_server_address + ":5001/device_state", function( data ) {
         $.each(data, function( index, item ) {
           $("#"+item.room).data(item.type, item.value)
       });
