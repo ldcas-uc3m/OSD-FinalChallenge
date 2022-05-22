@@ -30,7 +30,7 @@ def device_state():
         print("Received GET request", file=os.sys.stderr)
         response = json.dumps(get_device_state())
         print("Sent data to backend", file=os.sys.stderr)
-        print("Sent", response, "to backend")
+        print("Sent", response, "to backend", file=os.sys.stderr)
         return response, 200
 
 
