@@ -9,7 +9,9 @@ var get_current_sensor_data = function() {
     $.getJSON("http://" + backend_api_address + ":5001/device_state", function(data) {
         $.each(data, function(index, item) {
           $("#"+item.room).data(item.type, item.value)
-          console.log(item)
+          console.log(item.room)
+          console.log(item.type)
+          console.log(item.value)
         });
         // console.log(data)
     });
