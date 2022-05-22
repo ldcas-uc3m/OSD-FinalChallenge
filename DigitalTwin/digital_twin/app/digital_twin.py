@@ -43,6 +43,8 @@ curr_humidity = 0
 humidity = 0
 curr_air_level = 0
 air_level = 0
+current_air_mode = 0
+air_mode = 0
 # TODO: Update
 
 
@@ -223,7 +225,7 @@ def connect_mqtt_1():
 
 
 def connect_mqtt_2():
-    global current_air_conditioner_mode
+    global current_air_mode
     
     client = mqtt.Client(ROOM_ID + "_Client_1884")
     client.username_pw_set(username=MQTT_USER, password=MQTT_PASSWORD)
@@ -238,14 +240,14 @@ def connect_mqtt_2():
     # main loop
     while True:
         # check for commands in mqtt-1
-        if air_conditioner_mode != current_air_conditioner_mode:
+        if air_mode != current_air_mode:
             client.publish(
                 AIR_MODE_COMAND_TOPIC, 
-                payload = json.dumps({"mode": air_conditioner_mode}),
+                payload = json.dumps({"mode": air_mode}),
                 qos = 0,
                 retain = False
             )
-            print("Published", air_conditioner_mode, "in", AIR_MODE_COMAND_TOPIC)
+            print("Published", air_mode, "in", AIR_MODE_COMAND_TOPIC)
 
         # TODO: Update
 
