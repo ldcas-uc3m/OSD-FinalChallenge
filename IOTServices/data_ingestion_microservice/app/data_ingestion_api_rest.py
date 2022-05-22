@@ -29,7 +29,7 @@ def device_state():
     elif request.method == "GET":
         print("Received GET request")
         response = json.dumps(get_device_state())
-        print("Sent", response, "to backend")
+        print("Sent data to backend")
         return response, 200
 
 
