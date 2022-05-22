@@ -58,7 +58,7 @@ def get_device_state():
                 else:
                     value = mycursor.fetchone()  # fetch result
 
-                response[room][device] = value[0]
+                response[room][device] = value
 
         mydb.close()
         return response
