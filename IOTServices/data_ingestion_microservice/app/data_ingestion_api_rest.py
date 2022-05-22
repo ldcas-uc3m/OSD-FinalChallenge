@@ -18,7 +18,7 @@ def device_state():
     # GET requests will be blocked
     if request.method == "POST":
         params = request.get_json()
-        print("Received POST request, with parameters", params)
+        print("Received POST request, with parameters", params, file=os.sys.stderr)
         if len(params) != 3:  # room, type, value
             return {"response":"Incorrect parameters"}, 401
         else:
@@ -27,9 +27,9 @@ def device_state():
             return {"response":f"{mycursor.rowcount} records inserted."}, 200
 
     elif request.method == "GET":
-        print("Received GET request")
+        print("Received GET request", file=os.sys.stderr)
         response = json.dumps(get_device_state())
-        print("Sent data to backend")
+        print("Sent data to backend", file=os.sys.stderr)
         # print("Sent", response, "to backend")
         return response, 200
 
