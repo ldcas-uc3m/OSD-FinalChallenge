@@ -16,8 +16,8 @@ MQTT_PASSWORD = os.getenv("MQTT_PASSWORD")
 DATA_INGESTION_API_ADDRESS = os.getenv("DATA_INGESTION_API_ADDRESS")
 DATA_INGESTION_API_PORT = os.getenv("DATA_INGESTION_API_PORT")
 
-API_HOST = os.getenv("MESSAGE_ROUTER_API_HOST")
-API_PORT = os.getenv("MESSAGE_ROUTER_API_PORT")
+API_HOST = os.getenv("HOST")
+API_PORT = os.getenv("PORT")
 API_URL = "http://" + API_HOST + ":" + API_PORT
 
 DATA_INGESTION_API_URL = "http://" + DATA_INGESTION_API_ADDRESS + ":" + DATA_INGESTION_API_PORT
@@ -89,7 +89,7 @@ def on_message(client, userdata, msg):
             # normal case, post data to REST API
             value = payload["value"]
             data = {"room": room_name, "type": topic[-1], "value": value}
-            requests.post(API_URL + "/device_state", json={"room": room_name, "type": topic[-1], "value": value})
+            requests.post(DATA_INGESTION_API_URL + "/device_state", json={"room": room_name, "type": topic[-1], "value": value})
         
         print("Sent", data, "to Data Ingestion API")
 

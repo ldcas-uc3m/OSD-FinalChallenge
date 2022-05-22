@@ -26,7 +26,6 @@ def insert_device_state(params):
 
     with mydb.cursor() as mycursor:
         sql = "INSERT INTO device_state (room, type, value, date) VALUES (%s, %s, %s, %s)"
-        print(sql, file=os.sys.stderr)
         values = (
             params["room"],
             params["type"],
@@ -46,7 +45,9 @@ def get_device_state():
     mydb = connect_database()
     response = {}
     with mydb.cursor() as mycursor:
-        for room in range(NUMBER_ROOMS):
+        for room_id in range(1, NUMBER_ROOMS + 1):
+            room = "Room" + str(room_id)
+            response[room] = {}
             for device in DEVICES:
                 sql = "SELECT value FROM device_state WHERE room=%s AND type=%s ORDER BY date DESC LIMIT 1;"
                     
