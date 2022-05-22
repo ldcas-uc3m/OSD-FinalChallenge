@@ -173,7 +173,7 @@ def on_message_1884(client, userdata, msg):
 # ---
 
 def connect_mqtt_1():
-    global temperature, curr_temperature, humidity, curr_humidity
+    global curr_temperature, curr_humidity, curr_air_level
 
     client = mqtt.Client(ROOM_ID + "_Client_1883")
     client.username_pw_set(username=MQTT_USER, password=MQTT_PASSWORD)
