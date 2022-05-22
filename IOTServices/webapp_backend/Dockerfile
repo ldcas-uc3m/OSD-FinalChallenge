@@ -5,7 +5,7 @@ COPY /app /etc/usr/src/app
 WORKDIR /etc/usr/src/app
 
 # install libraries
-RUN pip install Flask Flask-cors requests
+RUN pip install Flask Flask-Cors requests
 
 ENTRYPOINT ["python"]
 CMD ["-u", "webapp_backend_api_rest.py"]

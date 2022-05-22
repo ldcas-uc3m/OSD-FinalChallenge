@@ -23,7 +23,7 @@ def device_state():
             return {"response":"Incorrect parameters"}, 401
         else:
             mycursor = insert_device_state(params)
-            print("Data saved to database")
+            print("Data saved to database", file=os.sys.stderr)
             return {"response":f"{mycursor.rowcount} records inserted."}, 200
 
     elif request.method == "GET":
