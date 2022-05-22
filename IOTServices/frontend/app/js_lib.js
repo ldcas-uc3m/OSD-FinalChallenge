@@ -47,6 +47,85 @@ $("#air_mode").change(function(){
     });
 })
 
+
+$("#inner_light_mode").change(function(){
+    var value = $(this).val()
+    $.ajax({
+        type: "POST",
+        url: api_server_address+"device_state",
+        data: JSON.stringify({
+            "room":$("#room_id").text(),
+            "type":"inner-light-mode",
+            "value":value,
+        }),
+        contentType: 'application/json'
+    });
+})
+
+$("#exterior_light_mode").change(function(){
+    var value = $(this).val()
+    $.ajax({
+        type: "POST",
+        url: api_server_address+"device_state",
+        data: JSON.stringify({
+            "room":$("#room_id").text(),
+            "type":"inner-light-mode",
+            "value":value,
+        }),
+        contentType: 'application/json'
+    });
+})
+
+$("#exterior_light_level").change(function(){
+    var value = $(this).val()
+    $.ajax({
+        type: "POST",
+        url: api_server_address+"device_state",
+        data: JSON.stringify({
+            "room":$("#room_id").text(),
+            "type":"exterior_light_level",
+            "value":value,
+        }),
+        contentType: 'application/json'
+    });
+})
+
+$("#inner_light_level").change(function(){
+    var value = $(this).val()
+    $.ajax({
+        type: "POST",
+        url: api_server_address+"device_state",
+        data: JSON.stringify({
+            "room":$("#room_id").text(),
+            "type":"inner_light_level",
+            "value":value,
+        }),
+        contentType: 'application/json'
+    });
+})
+
+
+$("#my_presence_value").change(function(){
+    var value = $(this).val()
+    $.ajax({
+        type: "POST",
+        url: api_server_address+"device_state",
+        data: JSON.stringify({
+            "room":$("#room_id").text(),
+            "type":"inner_light_level",
+            "value":value,
+        }),
+        contentType: 'application/json'
+    });
+    if(value ="0"){
+        value = "no"
+    }else{
+        vale ="Yes"
+    }
+
+
+})
+
 $("#rooms").on("click", "td", function() {
     $("#room_id").text($( this ).attr("id") || "");
     $("#temperature_value").text($( this ).data("temperature") || "");
