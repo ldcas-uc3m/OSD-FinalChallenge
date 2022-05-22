@@ -49,7 +49,7 @@ def get_device_state():
             room = "Room" + str(room_id)
             response[room] = {}
             for device in DEVICES:
-                sql = "SELECT value FROM device_state WHERE room=%s AND type=%s ORDER BY date ASC LIMIT 1;"
+                sql = "SELECT value FROM device_state WHERE room=%s AND type=%s ORDER BY date DESC LIMIT 1;"
                     
                 mycursor.execute(sql, (room, device))  # run query
                 if not mycursor.rowcount:
@@ -57,6 +57,7 @@ def get_device_state():
                     continue
                 else:
                     value = mycursor.fetchone()  # fetch result
+                    print("value=", value, file=os.sys.stderr)
 
                 response[room][device] = value
 
