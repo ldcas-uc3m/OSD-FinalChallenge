@@ -21,9 +21,9 @@ def device_state():
         return json.dumps(r.json()), r.status_code
 
     elif request.method == 'GET':
-        print("Received GET request")
+        print("Received GET request. Forwarding to Data Ingestion")
         r = requests.get(DATA_INGESTION_API_URL+"/device_state")
-        print("Forwarding to Data Ingestion")
+        print("Response from Data Ingestion received")
         return json.dumps(r.json()), r.status_code
 
 

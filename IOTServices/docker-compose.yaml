@@ -23,13 +23,13 @@ services:
       - MQTT_PASSWORD=dso_password
       - MQTT_SERVER_ADDRESS=mqtt-1
       - MQTT_SERVER_PORT=1883
+      - HOST=0.0.0.0  # self
+      - PORT=5002  # self
       - DATA_INGESTION_API_ADDRESS=data_ingestion_microservice
       - DATA_INGESTION_API_PORT=5000
-      - MESSAGE_ROUTER_API_HOST=0.0.0.0  # self
-      - MESSAGE_ROUTER_API_PORT=5002
-      - PYTHONBUFFERED=1
+      - PYTHONBUFFERED=1  # allows for the Python output to go directly to the shell
     ports:
-      - 5002:5000
+      - 5002:5000  # flask
     volumes:
       - ./message_router/app:/etc/usr/src/app
     depends_on:
@@ -54,33 +54,34 @@ services:
     image: adminer
     restart: unless-stopped
     ports:
-      - 8080:8080
+      - 8080:8080  # website
     depends_on:
       - mariaDB
 
   data_ingestion_microservice:
     build: ./data_ingestion_microservice
     ports:
-      - 5000:5000  # for Flask
+      - 5000:5000  # Flask
     links: 
       - "mariaDB:mariaDB"  # to be able to call mariaDB (IP) from the container
     depends_on:
       - mariaDB
     environment:
       - HOST=0.0.0.0  # self
-      - PORT=5000
+      - PORT=5000  # self
       - DB_HOST=mariaDB
       - DB_USER=dso_db_user
       - DB_PASSWORD=dso_db_password
       - DB_NAME=dso_db
       - NUMBER_ROOMS=40  # number of rooms used
+      - PYTHONBUFFERED=1
     volumes:
       - ./data_ingestion_microservice/app:/etc/usr/src/app
   
   frontend:
     build: ./frontend
     ports:
-      - 80:80
+      - 80:80  # http
     volumes:
       - ./frontend/app:/usr/local/apache2/htdocs
     depends_on:
@@ -91,12 +92,13 @@ services:
     ports:
       - 5001:5000
     environment:
-      - HOST=0.0.0.0
-      - PORT=5000
+      - HOST=0.0.0.0  # self
+      - PORT=5001  # self
       - DATA_INGESTION_API_ADDRESS=data_ingestion_microservice
       - DATA_INGESTION_API_PORT=5000
       - MESSAGE_ROUTER_API_ADDRESS=message_router
       - MESSAGE_ROUTER_API_PORT=5002
+      - PYTHONBUFFERED=1
     volumes:
       - ./webapp_backend/app:/etc/usr/src/app
     depends_on:

@@ -26,7 +26,6 @@ def insert_device_state(params):
 
     with mydb.cursor() as mycursor:
         sql = "INSERT INTO device_state (room, type, value, date) VALUES (%s, %s, %s, %s)"
-        print(sql, file=os.sys.stderr)
         values = (
             params["room"],
             params["type"],

@@ -9,7 +9,7 @@ services:
       - MQTT_2_SERVER_PORT=1884
       - MQTT_USERNAME=dso_server
       - MQTT_PASSWORD=dso_password
-      - PYTHONBUFFERED=1
+      - PYTHONBUFFERED=1  # allows for the Python output to go directly to the shell
     volumes:
       - ./digital_twin/app:/etc/usr/src/app
 
