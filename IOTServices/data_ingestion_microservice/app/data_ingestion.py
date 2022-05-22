@@ -57,9 +57,11 @@ def get_device_state():
                     continue
                 else:
                     value = mycursor.fetchone()  # fetch result
-                    print("value=", value, file=os.sys.stderr)
 
-                response[room][device] = value
+                if value != None:
+                    response[room][device] = value[0]
+                else:
+                    response[room][device] = None
 
         mydb.close()
         return response
