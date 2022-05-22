@@ -5,7 +5,7 @@
 var backend_api_address = "34.159.103.125"
 
 var get_current_sensor_data = function() {
-    console.log("existo")
+    console.log("Requesting data from backend")
     $.getJSON("http://" + backend_api_address + ":5001/device_state", function(data) {
         $.each(data, function(index, item) {
           $("#"+item.room).data(item.type, item.value)
