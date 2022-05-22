@@ -43,14 +43,15 @@ def insert_device_state(params):
 
 def get_device_state():
     mydb = connect_database()
-    response = []
+    response = {}
     with mydb.cursor() as mycursor:
         for room_id in range(1, NUMBER_ROOMS + 1):
             room = "Room" + str(room_id)
 
-            response.append({"room": room})
+            response[room] = []
 
             for device in DEVICES:
+                
                 sql = "SELECT value FROM device_state WHERE room=%s AND type=%s ORDER BY date DESC LIMIT 1;"
                     
                 mycursor.execute(sql, (room, device))  # run query
@@ -58,13 +59,20 @@ def get_device_state():
                     print("No results found for", room, device)
                     continue
                 else:
-                    value = mycursor.fetchone()  # fetch result
+                    value = mycursor.fetchone()  # fetch result -> returns a tuple
 
-                    response[room_id - 1]["type"] = device
                     if value is None:
-                        response[room_id - 1]["value"] = None
+                        response[room].append({
+                            "room": room,
+                            "type": device,
+                            "value": None
+                            })
                     else:
-                        response[room_id - 1]["value"] = value[0]
+                        response[room].append({
+                            "room": room,
+                            "type": device,
+                            "value": value[0]
+                            })
 
 
         mydb.close()
