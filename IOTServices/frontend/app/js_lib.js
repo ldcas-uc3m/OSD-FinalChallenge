@@ -67,7 +67,7 @@ $("#inner_light_mode").change(function(){
 $("#rooms").on("click", "td", function() {
     // unpackage data from backend
     $("#room_id").text($( this ).attr("id") || "");
-    $("#temperature_value").text($( this ).data("temperature") || "");
+    $("#temperature_value").text($( this ).data("temperature"));
     $("#presence_value").text($( this ).data("presence") || "0");
     $("#air_conditioner_value").text($( this ).data("air-level") || "");
     $("#air_conditioner_mode").val($( this ).data("air-mode"));
