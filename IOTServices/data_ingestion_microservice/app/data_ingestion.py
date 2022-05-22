@@ -2,7 +2,7 @@
 
 from datetime import datetime
 import mysql.connector
-import os
+import os, json
 
 
 DB_HOST = os.getenv("DB_HOST")
@@ -43,37 +43,51 @@ def insert_device_state(params):
 
 def get_device_state():
     mydb = connect_database()
-    response = {}
+    r = []
     with mydb.cursor() as mycursor:
-        for room_id in range(1, NUMBER_ROOMS + 1):
-            room = "Room" + str(room_id)
-
-            response[room] = []
-
-            for device in DEVICES:
-                
-                sql = "SELECT value FROM device_state WHERE room=%s AND type=%s ORDER BY date DESC LIMIT 1;"
-                    
-                mycursor.execute(sql, (room, device))  # run query
-                if not mycursor.rowcount:
-                    print("No results found for", room, device)
-                    continue
-                else:
-                    value = mycursor.fetchone()  # fetch result -> returns a tuple
-
-                    if value is None:
-                        response[room].append({
-                            "room": room,
-                            "type": device,
-                            "value": None
-                            })
-                    else:
-                        response[room].append({
-                            "room": room,
-                            "type": device,
-                            "value": value[0]
-                            })
-
-
+        mycursor.execute("SELECT * FROM device_state ORDER BY date ASC")
+        myresult = mycursor.fetchall()
+        for id, room, type, value, date in myresult:
+            r.append({
+                "room": room,
+                "type": type,
+                "value": value,
+                "date": str(date)
+            })
         mydb.close()
-        return response
+    return json.dumps(r, sort_keys=True)
+
+    # response = {}
+    # with mydb.cursor() as mycursor:
+    #     for room_id in range(1, NUMBER_ROOMS + 1):
+    #         room = "Room" + str(room_id)
+
+    #         response[room] = []
+
+    #         for device in DEVICES:
+                
+    #             sql = "SELECT value FROM device_state WHERE room=%s AND type=%s ORDER BY date DESC LIMIT 1;"
+                    
+    #             mycursor.execute(sql, (room, device))  # run query
+    #             if not mycursor.rowcount:
+    #                 print("No results found for", room, device)
+    #                 continue
+    #             else:
+    #                 value = mycursor.fetchone()  # fetch result -> returns a tuple
+
+    #                 if value is None:
+    #                     response[room].append({
+    #                         "room": room,
+    #                         "type": device,
+    #                         "value": None
+    #                         })
+    #                 else:
+    #                     response[room].append({
+    #                         "room": room,
+    #                         "type": device,
+    #                         "value": value[0]
+    #                         })
+
+
+        # mydb.close()
+        # return response
