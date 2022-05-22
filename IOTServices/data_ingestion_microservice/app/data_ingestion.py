@@ -46,7 +46,7 @@ def get_device_state():
     mydb = connect_database()
     response = {}
     with mydb.cursor() as mycursor:
-        for room in range(NUMBER_ROOMS):
+        for room in range(1, NUMBER_ROOMS + 1):
             response["Room" + str(room)] = {}
             for device in DEVICES:
                 sql = "SELECT value FROM device_state WHERE room=%s AND type=%s ORDER BY date DESC LIMIT 1;"
