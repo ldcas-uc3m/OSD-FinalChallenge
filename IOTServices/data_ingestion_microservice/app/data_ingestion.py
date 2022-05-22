@@ -49,8 +49,13 @@ def get_device_state():
         for room in range(NUMBER_ROOMS):
             for device in DEVICES:
                 sql = "SELECT value FROM device_state WHERE room=%s AND type=%s ORDER BY date DESC LIMIT 1;"
+                    
                 mycursor.execute(sql, (room, device))  # run query
-                value = mycursor.fetchone()  # fetch result
+                if not mycursor.rowcount:
+                    print("No results found for", room, device)
+                    continue
+                else:
+                    value = mycursor.fetchone()  # fetch result
 
                 response[room][device] = value
 
