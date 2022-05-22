@@ -192,9 +192,9 @@ Each client is subscribed to different topics, as such:
 In order to send commands to the RPi, the frontend sends JSONs to the backend.  
 The formats, depending on the action, are the following:
 - `#air_mode`: Change the air conditioner mode (cold, hot, off)  
-Pakage structure: `{ "room": <roomID>, "type": "air-conditioner-mode", "value": <"cold" | "hot" | "off"> }`
+Pakage structure: `{ "room": <roomID>, "type": "air-mode", "value": <"cold" | "hot" | "off"> }`
 - `#air_level`: Change the air conditioner intensity  
-Pakage structure: `{ "room": <roomID>, "type": "air-conditioner-level", "value": <int from 0 to 100 (%)> }`
+Pakage structure: `{ "room": <roomID>, "type": "air-level", "value": <int from 0 to 100 (%)> }`
 - `#blinds`: Change the value of the blinds  
 Pakage structure: `{ "room": <roomID>, "type": "blinds", "value": <int from 0 to 180 (º)> }`
 - `#inner_light_mode`: Change the mode of the inner light (on/off)  
@@ -221,7 +221,7 @@ sudo usermod -aG docker $USER  # not explicitly needed, but recommended
 sudo apt update && sudo apt upgrade
 sudo apt install pip -y
 ```
-3. Copy the IP address of the machine that will hold the IOTServices into `DigitalTwin/docker-compose.yaml` (`MQTT_SERVER_ADDRESS` enviroment variable), and into the `api_server_address` variable inside `IOTServices/frontend/js_lib.js`.
+3. Copy the IP address of the machine that will hold the IOTServices into `DigitalTwin/docker-compose.yaml` (`MQTT_SERVER_ADDRESS` enviroment variable), and into the `api_server_address` variable inside `IOTServices/frontend/app/js_lib.js`.
 4. Make sure port `1883` (MQTT-1) and `1884` (MQTT-2) are open on all machines, and ports `5000` (Data Ingestion ReST API), `5001` (Webapp Backend ReST API), `5002` (Message Router ReST API), `3306` (mariaDB), `8080` (adminer) and `80` (http) are open on the IOTServices machine.
 5. Setup the circuit on the Raspberry Pi, as such:  
 
