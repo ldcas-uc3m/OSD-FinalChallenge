@@ -1,8 +1,5 @@
-import sys
+import sys, time, schedule, Adafruit_DHT
 import RPi.GPIO as GPIO
-import schedule
-import time
-import Adafruit_DHT
 from threading import Thread
 import paho.mqtt.client as mqtt
 

@@ -1,9 +1,4 @@
-import subprocess
-import time
-import threading
-import os
-import random
-import json
+import subprocess, time, threading, os, random, json
 import paho.mqtt.client as mqtt
 
 
@@ -34,7 +29,8 @@ CONFIG_TOPIC = "hotel/rooms/" + ROOM_ID + "/config"
 TELEMETRY_TOPIC = ""
 TEMPERATURE_TOPIC = ""
 HUMIDITY_TOPIC = ""
-AIR_CONDITIONER_TOPIC = ""
+AIR_LEVEL_TOPIC = ""
+AIR_MODE_TOPIC = ""
 BLIND_TOPIC = ""
 IN_LIGHT_TOPIC = ""
 OUT_LIGHT_TOPIC = ""
@@ -45,6 +41,8 @@ curr_temperature = 0
 temperature = 0
 curr_humidity = 0
 humidity = 0
+curr_air_level = 0
+air_level = 0
 # TODO: Update
 
 
@@ -103,7 +101,7 @@ def on_connect_1883(client, userdata, flags, rc):
 
 
 def on_message_1833(client, userdata, msg):
-    global room_number, TELEMETRY_TOPIC, TEMPERATURE_TOPIC, HUMIDITY_TOPIC, BLIND_TOPIC, IN_LIGHT_TOPIC, OUT_LIGHT_TOPIC, PRESENCE_TOPIC
+    global room_number, TELEMETRY_TOPIC, TEMPERATURE_TOPIC, HUMIDITY_TOPIC, BLIND_TOPIC, IN_LIGHT_TOPIC, OUT_LIGHT_TOPIC, PRESENCE_TOPIC, AIR_LEVEL_TOPIC, AIR_MODE_TOPIC
 
     print("Message received in MQTT-1 with topic", msg.topic, "and message", msg.payload.decode())
 
@@ -118,6 +116,8 @@ def on_message_1833(client, userdata, msg):
         TELEMETRY_TOPIC = "hotel/rooms/" + room_number + "/telemetry"
         TEMPERATURE_TOPIC = TELEMETRY_TOPIC + "/temperature"
         HUMIDITY_TOPIC = TELEMETRY_TOPIC + "/humidity"
+        AIR_LEVEL_TOPIC = TELEMETRY_TOPIC + "/air-level"
+        AIR_MODE_TOPIC = TELEMETRY_TOPIC + "/air-mode"
         BLIND_TOPIC = TELEMETRY_TOPIC + "/blind"
         IN_LIGHT_TOPIC = TELEMETRY_TOPIC + "/inner-light"
         OUT_LIGHT_TOPIC = TELEMETRY_TOPIC + "/exterior-light"
@@ -149,7 +149,7 @@ def on_connect_1884(client, userdata, flags, rc):
 def on_message_1884(client, userdata, msg):
     # pass data from RPi
 
-    global humidity, temperature
+    global humidity, temperature, air_level
 
     print("Message received in MQTT-2 with topic", msg.topic, "and message", msg.payload.decode())
 
@@ -160,8 +160,12 @@ def on_message_1884(client, userdata, msg):
         temperature = msg.payload.decode()
         
     elif topic[-1] == "humidity":
-        print("Temperature received")
+        print("Humidity received")
         humidity = msg.payload.decode()
+    
+    elif topic[-1] == "air-level":
+        print("Air level received")
+        air_level = msg.payload.decode()
 
 
 # ---
@@ -194,6 +198,11 @@ def connect_mqtt_1():
             client.publish(HUMIDITY_TOPIC, payload = humidity, qos = 0, retain = False)
             print("Sent to MQTT-1", humidity, "on topic", HUMIDITY_TOPIC)
             curr_humidity = humidity
+        
+        if air_level != curr_air_level:
+            client.publish(AIR_LEVEL_TOPIC, payload = air_level, qos = 0, retain = False)
+            print("Sent to MQTT-1", air_level, "on topic", AIR_LEVEL_TOPIC)
+            curr_air_level = air_level
 
         time.sleep(1)
     
@@ -203,7 +212,7 @@ def connect_mqtt_1():
         # we need to convert data to JSON so it's binarizable and can be sent to the server
         json_temperature = json.dumps({ "active": sensors["temperature"]["active"], "value": sensors["temperature"]["level"]})
         json_humidity = json.dumps({ "active": sensors["humidity"]["active"], "value": sensors["humidity"]["level"]})
-
+        # TODO: UPDATE
         # send data
         client.publish(TEMPERATURE_TOPIC, payload = json_temperature, qos = 0, retain = False)
         print("Publised", json_temperature, "in", TEMPERATURE_TOPIC)
@@ -224,19 +233,19 @@ def connect_mqtt_2():
     client.loop_start()
 
     # setup topics
-    AIR_CONDITIONER_COMAND_TOPIC = "hotel/rooms/"+room_number+"comman/air-conditioner"
+    AIR_MODE_COMAND_TOPIC = "hotel/rooms/"+room_number+"command/air-mode"
 
     # main loop
     while True:
         # check for commands in mqtt-1
         if air_conditioner_mode != current_air_conditioner_mode:
             client.publish(
-                AIR_CONDITIONER_COMAND_TOPIC, 
+                AIR_MODE_COMAND_TOPIC, 
                 payload = json.dumps({"mode": air_conditioner_mode}),
                 qos = 0,
                 retain = False
             )
-            print("Published", air_conditioner_mode, "in", AIR_CONDITIONER_COMAND_TOPIC)
+            print("Published", air_conditioner_mode, "in", AIR_MODE_COMAND_TOPIC)
 
         # TODO: Update
 

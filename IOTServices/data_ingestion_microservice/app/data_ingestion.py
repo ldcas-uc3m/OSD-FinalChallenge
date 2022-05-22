@@ -1,9 +1,8 @@
-# Implementation of the ReST API
+# Implementation of the Data Ingestion ReST API
 
 from datetime import datetime
 import mysql.connector
 import os
-import json
 
 
 DB_HOST = os.getenv("DB_HOST")
@@ -13,7 +12,8 @@ DB_NAME = os.getenv("DB_NAME")
 
 NUMBER_ROOMS = int(os.getenv("NUMBER_ROOMS"))
 
-DEVICES = ("temperature", "humidity", )
+# DEVICES = ("temperature", "humidity", "presence", "air-level", "blinds", "inner-light-level", "exterior-light-level")
+DEVICES = ("temperature", "presence", "air-level")
 
 
 def connect_database():
@@ -39,13 +39,10 @@ def insert_device_state(params):
         mydb.commit()
         mydb.close()
 
-        print("Data saved to database")
-
         return mycursor
 
 
 def get_device_state():
-    # TODO (https://pynative.com/python-mysql-select-query-to-fetch-data/)
     mydb = connect_database()
     response = {}
     with mydb.cursor() as mycursor:
@@ -57,4 +54,5 @@ def get_device_state():
 
                 response[room][device] = value
 
-    return json.dumps(response)
+        mydb.close()
+        return response

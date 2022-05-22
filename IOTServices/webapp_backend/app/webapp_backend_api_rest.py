@@ -10,14 +10,20 @@ CORS(app)
 @app.route("/device_state", methods=['GET', 'POST'])
 def device_state():
     if request.method == 'POST':
+        print("Received POST request")
+
         params = request.get_json()
         r = requests.post(
             MESSAGE_ROUTER_API_URL+"/device_state",
             json = params
         )
+        print("Forwarding to Message Router")
         return json.dumps(r.json()), r.status_code
+
     elif request.method == 'GET':
+        print("Received GET request")
         r = requests.get(DATA_INGESTION_API_URL+"/device_state")
+        print("Forwarding to Data Ingestion")
         return json.dumps(r.json()), r.status_code
 
 

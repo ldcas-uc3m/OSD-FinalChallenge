@@ -1,7 +1,4 @@
-import json
-import os
-import threading
-import requests
+import os, json, threading, requests
 import paho.mqtt.client as mqtt
 from flask_cors import CORS
 from flask import Flask, request
@@ -94,7 +91,7 @@ def on_message(client, userdata, msg):
             data = {"room": room_name, "type": topic[-1], "value": value}
             requests.post(API_URL + "/device_state", json={"room": room_name, "type": topic[-1], "value": value})
         
-        print("Sent", data, "to ReST API")
+        print("Sent", data, "to Data Ingestion API")
 
 # ---
 # REsT API - commands
@@ -117,6 +114,8 @@ def send_command(params):
 def device_state():
     # GET requests will be blocked
     if request.method == "POST":
+        print("Received POST request")
+
         params = request.get_json()
         return send_command(params)
 

@@ -67,6 +67,11 @@ def randomize_sensors():
         "humidity": {
         "active": True if random.randint(0, 1) == 1 else False,
         "level": random.randint(40, 80)
+        },
+        "air_conditioner": {
+            "active": True,
+            "mode": d, 
+            "level": random.randint(0, 100)
         }
         # TODO: update
     }
