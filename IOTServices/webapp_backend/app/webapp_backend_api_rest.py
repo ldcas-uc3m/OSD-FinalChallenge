@@ -9,6 +9,7 @@ CORS(app)
 
 @app.route("/device_state", methods=['GET', 'POST'])
 def device_state():
+    print("HEY, EXISTO!", file=os.sys.stderr)
     if request.method == 'POST':
         print("Received POST request")
 
@@ -27,7 +28,6 @@ def device_state():
         return json.dumps(r.json()), r.status_code
 
 
-print("HEY, EXISTO!", file=os.sys.stderr)
 DATA_INGESTION_API_URL = "http://"+os.getenv("DATA_INGESTION_API_ADDRESS")+":"+os.getenv("DATA_INGESTION_API_PORT")
 MESSAGE_ROUTER_API_URL = "http://"+os.getenv("MESSAGE_ROUTER_API_ADDRESS")+":"+os.getenv("MESSAGE_ROUTER_API_PORT")
 HOST = os.getenv('HOST')
