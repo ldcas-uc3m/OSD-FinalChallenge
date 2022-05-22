@@ -3,12 +3,17 @@
 from datetime import datetime
 import mysql.connector
 import os
+import json
 
 
 DB_HOST = os.getenv("DB_HOST")
 DB_USER = os.getenv("DB_USER")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
 DB_NAME = os.getenv("DB_NAME")
+
+NUMBER_ROOMS = int(os.getenv("NUMBER_ROOMS"))
+
+DEVICES = ("temperature", "humidity", )
 
 
 def connect_database():
@@ -39,8 +44,17 @@ def insert_device_state(params):
         return mycursor
 
 
-def get_device_state(params):
+def get_device_state():
     # TODO (https://pynative.com/python-mysql-select-query-to-fetch-data/)
     mydb = connect_database()
+    response = {}
+    with mydb.cursor() as mycursor:
+        for room in range(NUMBER_ROOMS):
+            for device in DEVICES:
+                sql = "SELECT value FROM device_state WHERE room=%s AND type=%s ORDER BY date DESC LIMIT 1;"
+                mycursor.execute(sql, (room, device))  # run query
+                value = mycursor.fetchone()  # fetch result
 
-    return
+                response[room][device] = value
+
+    return json.dumps(response)
