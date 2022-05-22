@@ -58,7 +58,7 @@ def get_device_state():
                 else:
                     value = mycursor.fetchone()  # fetch result
 
-                if value != None:
+                if value is not None:
                     response[room][device] = value[0]
                 else:
                     response[room][device] = None
