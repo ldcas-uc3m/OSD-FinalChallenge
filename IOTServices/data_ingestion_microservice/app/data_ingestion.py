@@ -56,9 +56,9 @@ def get_device_state():
                     print("No results found for", room, device)
                     continue
                 else:
-                    value = mycursor.fetchone()[0]  # fetch result
+                    value = mycursor.fetchone()  # fetch result
 
-                response[room][device] = value
+                response[room][device] = value[0]
 
         mydb.close()
         return response
