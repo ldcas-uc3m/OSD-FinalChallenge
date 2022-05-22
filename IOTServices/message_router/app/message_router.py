@@ -89,7 +89,7 @@ def on_message(client, userdata, msg):
             # normal case, post data to REST API
             value = payload["value"]
             data = {"room": room_name, "type": topic[-1], "value": value}
-            requests.post(API_URL + "/device_state", json={"room": room_name, "type": topic[-1], "value": value})
+            requests.post(DATA_INGESTION_API_URL + "/device_state", json={"room": room_name, "type": topic[-1], "value": value})
         
         print("Sent", data, "to Data Ingestion API")
 
