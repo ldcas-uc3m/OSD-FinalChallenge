@@ -212,7 +212,7 @@ We need 2 machines (running Debian) to implement this: one for DigitalTwin, and 
 
 1. Update the machines and install docker & docker-compose
 ```bash
-sudo apt update && sudo apt upgrade
+sudo apt update && sudo apt upgrade -y
 sudo apt install docker docker-compose -y
 sudo usermod -aG docker $USER  # not explicitly needed, but recommended
 ```

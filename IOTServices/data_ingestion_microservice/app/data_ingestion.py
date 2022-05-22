@@ -43,11 +43,13 @@ def insert_device_state(params):
 
 def get_device_state():
     mydb = connect_database()
-    response = {}
+    response = []
     with mydb.cursor() as mycursor:
         for room_id in range(1, NUMBER_ROOMS + 1):
             room = "Room" + str(room_id)
-            response[room] = {}
+
+            response.append({"room": room})
+
             for device in DEVICES:
                 sql = "SELECT value FROM device_state WHERE room=%s AND type=%s ORDER BY date DESC LIMIT 1;"
                     
@@ -58,10 +60,12 @@ def get_device_state():
                 else:
                     value = mycursor.fetchone()  # fetch result
 
-                if value is not None:
-                    response[room][device] = value[0]
-                else:
-                    response[room][device] = None
+                    response[room_id]["type"] = device
+                    if value is None:
+                        response[room_id]["value"] = None
+                    else:
+                        response[room_id]["value"] = value[0]
+
 
         mydb.close()
         return response
