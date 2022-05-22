@@ -2,12 +2,11 @@
  * Javascript file to implement client side usability for 
  * Operating Systems Desing exercises.
  */
- var api_server_address = "34.159.103.125"
+var backend_api_address = "34.159.103.125"
 
- var get_current_sensor_data = function(){
-    $.getJSON( "http://" + api_server_address + ":5001", function( data ) {
-    // $.getJSON( "http://" + api_server_address + ":5001/device_state", function( data ) {
-        $.each(data, function( index, item ) {
+var get_current_sensor_data = function() {
+    $.getJSON("http://" + backend_api_address + ":5001/device_state", function(data) {
+        $.each(data, function(index, item) {
           $("#"+item.room).data(item.type, item.value)
       });
     });
@@ -38,7 +37,7 @@ $("#air_mode").change(function(){
     var value = $(this).val()
     $.ajax({
         type: "POST",
-        url: api_server_address+"device_state",
+        url: "http://" + backend_api_address + ":5001/device_state",
         data: JSON.stringify({
             "room":$("#room_id").text(),
             "type":"air-mode",
@@ -53,7 +52,7 @@ $("#inner_light_mode").change(function(){
     var value = $(this).val()
     $.ajax({
         type: "POST",
-        url: api_server_address+"device_state",
+        url: "http://" + backend_api_address + ":5001/device_state",
         data: JSON.stringify({
             "room":$("#room_id").text(),
             "type":"inner-light-mode",
@@ -67,7 +66,7 @@ $("#exterior_light_mode").change(function(){
     var value = $(this).val()
     $.ajax({
         type: "POST",
-        url: api_server_address+"device_state",
+        url: "http://" + backend_api_address + ":5001/device_state",
         data: JSON.stringify({
             "room":$("#room_id").text(),
             "type":"inner-light-mode",
@@ -81,7 +80,7 @@ $("#exterior_light_level").change(function(){
     var value = $(this).val()
     $.ajax({
         type: "POST",
-        url: api_server_address+"device_state",
+        url: "http://" + backend_api_address + ":5001/device_state",
         data: JSON.stringify({
             "room":$("#room_id").text(),
             "type":"exterior_light_level",
@@ -95,7 +94,7 @@ $("#inner_light_level").change(function(){
     var value = $(this).val()
     $.ajax({
         type: "POST",
-        url: api_server_address+"device_state",
+        url: "http://" + backend_api_address + ":5001/device_state",
         data: JSON.stringify({
             "room":$("#room_id").text(),
             "type":"inner_light_level",
@@ -110,7 +109,7 @@ $("#my_presence_value").change(function(){
     var value = $(this).val()
     $.ajax({
         type: "POST",
-        url: api_server_address+"device_state",
+        url: "http://" + backend_api_address + ":5001/device_state",
         data: JSON.stringify({
             "room":$("#room_id").text(),
             "type":"inner_light_level",
