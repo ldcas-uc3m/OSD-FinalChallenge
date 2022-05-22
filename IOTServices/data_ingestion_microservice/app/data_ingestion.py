@@ -60,11 +60,11 @@ def get_device_state():
                 else:
                     value = mycursor.fetchone()  # fetch result
 
-                    response[room_id]["type"] = device
+                    response[room_id - 1]["type"] = device
                     if value is None:
-                        response[room_id]["value"] = None
+                        response[room_id - 1]["value"] = None
                     else:
-                        response[room_id]["value"] = value[0]
+                        response[room_id - 1]["value"] = value[0]
 
 
         mydb.close()
