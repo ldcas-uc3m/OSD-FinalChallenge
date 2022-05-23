@@ -31,6 +31,8 @@ ALL_TOPICS = "hotel/rooms/+/telemetry/+"  # the + is kinda like a *, a wildcard.
 index_room = 1
 saved_rooms = {}
 
+COMMANDS = ("air-mode", "air-level")
+
 app = Flask(__name__)
 
 
@@ -72,42 +74,52 @@ def on_message(client, userdata, msg):
 
         room_name = topic[2]
 
-        # get value
-        if topic[-1] == "air":  # special case
-            level = payload["value"]
-            # post
-            requests.post(
-                DATA_INGESTION_API_URL + "/device_state",
-                json={"room":room_name, "type":"air-level", "value":level}
-            )
-            mode = payload["mode"]
-            requests.post(
-                DATA_INGESTION_API_URL+"/device_state",
-                json={"room":room_name, "type":"air-mode", "value":mode}
-            )
-        else:
-            # normal case, post data to REST API
-            value = payload["value"]
-            data = {"room": room_name, "type": topic[-1], "value": value}
-            requests.post(DATA_INGESTION_API_URL + "/device_state", json={"room": room_name, "type": topic[-1], "value": value})
+        if payload["active"]:  # we only save active sensors
+
+            # get value
+            if topic[-1] == "air":  # special case
+                level = payload["value"]
+                # post
+                requests.post(
+                    DATA_INGESTION_API_URL + "/device_state",
+                    json={"room":room_name, "type":"air-level", "value":level}
+                )
+                mode = payload["mode"]
+                requests.post(
+                    DATA_INGESTION_API_URL+"/device_state",
+                    json={"room":room_name, "type":"air-mode", "value":mode}
+                )
+            else:
+                # normal case, post data to REST API
+                value = payload["value"]
+                data = {"room": room_name, "type": topic[-1], "value": value}
+                requests.post(DATA_INGESTION_API_URL + "/device_state", json={"room": room_name, "type": topic[-1], "value": value})
+            
+            print("Sent", data, "to Data Ingestion API")
         
-        print("Sent", data, "to Data Ingestion API")
 
 # ---
 # REsT API - commands
 # ---
 
 def send_command(params):
+
     type_dev = params["type"]
     value = params["value"]
     room = params["room"]
-    topic = "hotel/rooms/" + room + "/comand/air-mode"
+    topic = "hotel/rooms/" + room + "/comand/" + type_dev
+    
     if type_dev == "air-mode":
         client.publish(topic, payload = json.dumps({"mode": value}), qos=0, retain=True)
-        print("Command message sent through" + topic)
-        return {"response":"Message successfully sent"}, 200
+    elif type_dev in ("inner-light-mode", "exterior-light-mode"):
+        client.publish(topic, payload = json.dumps({"on": value}), qos=0, retain=True)
+    elif type_dev in ("air-level", "blinds", "inner-light-light", "exterior-light-level"):
+        client.publish(topic, payload = json.dumps({"level": value}), qos=0, retain=True)
     else:
         return {"response":"Incorrect type param"}, 401
+
+    print("air-mode command message sent through" + topic)
+    return {"response":"Message successfully sent"}, 200
 
 
 @app.route("/device_state", methods=['POST'])

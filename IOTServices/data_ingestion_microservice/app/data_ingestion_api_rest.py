@@ -27,9 +27,9 @@ def device_state():
             return {"response":f"{mycursor.rowcount} records inserted."}, 200
 
     elif request.method == "GET":
-        print("Received GET request", file=os.sys.stderr)
+        # print("Received GET request", file=os.sys.stderr)
         response = json.dumps(get_device_state())
-        print("Sent data to backend", file=os.sys.stderr)
+        # print("Sent data to backend", file=os.sys.stderr)
         # print("Sent", response, "to backend", file=os.sys.stderr)
         return response, 200
 

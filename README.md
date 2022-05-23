@@ -130,21 +130,21 @@ The Digital Twin sends its id (docker container id) when it's connected.
 - Telemetry: `hotel/rooms/<room>/telemetry`  
 sdf
     - `/temperature`:  
-    Pakage structure: `{ "value": <int (ºC)> }`
+    Pakage structure: `{ "active": <bool>, "value": <int (ºC)> }`
     - `/humidity`:  
-    Pakage structure: `{ "value": <int (%)> }`
+    Pakage structure: `{ "active": <bool>, "value": <int (%)> }`
     - `/presence`:  
-    Pakage structure: `{ "value": <bool> }`
+    Pakage structure: `{ "active": <bool>, "value": <bool> }`
     - `/blinds`:  
-    Pakage structure: `{ "value": <int (%)> }`
+    Pakage structure: `{ "active": <bool>, "value": <int (%)> }`
     - `/temperature`:  
-    Pakage structure: `{ "value": <int (ºC)> }`
+    Pakage structure: `{ "active": <bool>, "value": <int (ºC)> }`
     - `/air`: hkjhf  
-    Pakage structure: `{ "mode": <"cold" | "hot" | "off">, "value": <int from 0 to 100 (%)> }`
+    Pakage structure: `{ "active": <bool>, "mode": <"cold" | "hot" | "off">, "value": <int from 0 to 100 (%)> }`
     - `/inner-light`: hkjhf  
-    Pakage structure: `{ "mode": <bool>, "value": <int from 0 to 100 (%)> }`
+    Pakage structure: `{ "active": <bool>, "on": <bool>, "value": <int from 0 to 100 (%)> }`
     - `/exterior-light`: hkjhf  
-    Pakage structure: `{ "mode": <bool>, "value": <int from 0 to 100 (%)> }`
+    Pakage structure: `{ "active": <bool>, "on": <bool>, "value": <int from 0 to 100 (%)> }`
 
 - Commands: `hotel/rooms/<room>/command`  
 These commands are sent from the frontend to the RPis, in order to change the behaviour of its devices.
@@ -155,11 +155,11 @@ These commands are sent from the frontend to the RPis, in order to change the be
     - `/blinds`: Change the value of the blinds  
     Pakage structure: `{ "level": <int from 0 to 180 (º)> }`
     - `/inner-light-mode`: Change the mode of the inner light (on/off)  
-    Pakage structure: `{ "mode": <bool> }`
+    Pakage structure: `{ "on": <bool> }`
     - `/inner-light-level`: Change the intensity of the inner light  
     Pakage structure: `{ "level": <int from 0 to 100 (%)> }`
     - `/exterior-light-mode`: Change the mode of the exterior light (on/off)  
-    Pakage structure: `{ "mode": <bool> }`
+    Pakage structure: `{ "on": <bool> }`
     - `/exterior-light-level`: Change the intensity of the exterior light  
     Pakage structure: `{ "level": <int from 0 to 100 (%)> }`
 

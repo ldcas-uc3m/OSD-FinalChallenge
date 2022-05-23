@@ -40,52 +40,45 @@ servo_pwm = GPIO.PWM(14, 50)
 
 GPIO.setwarnings(False)
 
+
+# GLOBAL STATUS VARIABLES
+
 sensors = {
     "temperature": {
         "active": True,
-        "level": 0
+        "temperature": 22
     },
     "humidity": {
         "active": True,
-        "level": 0
+        "humidity": 68
     },
     "air_conditioner": {
         "active": True,
         "mode": "off",  # can be hot or cold, or off
         "level": 0
     },
-    "blind": {
+    "blinds": {
+        "active": True,
         "angle": 0
     },
     "inner_light": {
         "active": True,
-        "level": 0
+        "on": True,
+        "level": 10
     },
     "exterior_light": {
         "active": True,
-        "level": 0
+        "on": True,
+        "level": 10
     },
     "presence": {
         "active": True,
-        "level": 0
+        "is_detected": False
     }
 }
 
-
-# GLOBAL STATUS VARIABLES
-sensors["temperature"]["level"] = 22
 dc = 0  # AC power
-sensors["presence"]["active"] = False  # presence
 
-sensors["blind"]["angle"] = 0  # blinds
-
-# exterior light
-sensors["exterior_light"]["active"] = 1
-sensors["exterior_light"]["level"] = 10
-
-# inner light
-sensors["inner_light"]["active"] = 1
-sensors["inner_light"]["level"] = 10
 
 # MQTT
 MQTT_SERVER = "34.107.55.203"
@@ -103,7 +96,7 @@ AIR_TOPIC = TELEMETRY_TOPIC + "/air-conditioner"
 IN_LIGHT_TOPIC = TELEMETRY_TOPIC + "/inner-light"
 EX_LIGHT_TOPIC = TELEMETRY_TOPIC + "/exterior-light"
 PRESENCE_TOPIC = TELEMETRY_TOPIC + "/presence"
-BLINDS_TOPIC = TELEMETRY_TOPIC + "/blind"
+BLINDS_TOPIC = TELEMETRY_TOPIC + "/blinds"
 
 
 # ---
@@ -173,36 +166,36 @@ def ext_schedule():
 def update_servo(angle):
     global sensors
     # angle = float(input('Enter angle between 0 & 180: '))
-    sensors["blind"]["angle"] = angle
-    print("The angle of servo motor right now is {} \n".format(sensors["blind"]["angle"]))
+    sensors["blinds"]["angle"] = angle
+    print("The angle of servo motor right now is {} \n".format(sensors["blinds"]["angle"]))
     servo()
 
 
 def servo():
     servo_pwm.start(0)
     # In servo terms here, 2 means 0 and 12 means 180 degree
-    servo_pwm.ChangeDutyCycle(2 + (sensors["blind"]["angle"] / 18))
+    servo_pwm.ChangeDutyCycle(2 + (sensors["blinds"]["angle"] / 18))
 
     time.sleep(0.5)
     servo_pwm.ChangeDutyCycle(0)
 
 
 # we will recieve values in this funtion to update the global variable
-# Note: To turn on the light the status need to be True or 1
+# Note: To turn on the light the status needs to be True
 def update_blu(status, intensity):
     global sensors
     # status = int(input('Enter the light status: '))
     # intensity = float(input('Enter the light Intensity: '))
-    sensors["exterior_light"]["active"] = status
+    sensors["exterior_light"]["on"] = status
     sensors["exterior_light"]["level"] = intensity
-    print("The status of blue external lights is {} and the intensity is {}\n".format(sensors["inner_light"]["active"], sensors["inner_light"]["level"]))
+    print("The status of blue external lights is {} and the intensity is {}\n".format(sensors["exterior_light"]["on"], sensors["inner_light"]["level"]))
     blu()
 
 
 def blu():
     global sensors
     blu_pwm.start(0)
-    if sensors["exterior_light"]["active"]:
+    if sensors["exterior_light"]["on"]:
         blu_pwm.ChangeDutyCycle(sensors["exterior_light"]["level"])
     else:
         blu_pwm.ChangeDutyCycle(0)
@@ -213,15 +206,15 @@ def update_white(status, intensity):
     global sensors
     # status = int(input('Enter the white light status: '))
     # intensity = float(input('Enter the white light Intensity: '))
-    sensors["inner_light"]["active"] = status
+    sensors["inner_light"]["on"] = status
     sensors["inner_light"]["level"] = intensity
-    print("The status of white internal lights is {} and the intensity is {}\n".format(sensors["inner_light"]["active"], sensors["inner_light"]["level"]))
+    print("The status of white internal lights is {} and the intensity is {}\n".format(sensors["inner_light"]["on"], sensors["inner_light"]["level"]))
     white()
 
 
 def white():
     white_pwm.start(0)
-    if sensors["inner_light"]["active"]:
+    if sensors["inner_light"]["on"]:
         white_pwm.ChangeDutyCycle(sensors["inner_light"]["level"])
     else:
         white_pwm.ChangeDutyCycle(0)
@@ -232,18 +225,18 @@ def motor():
 
     motor_pwm.start(0)
     while True:
-        # update mode (AC mode) depending on sensors["temperature"]["level"]
+        # update mode (AC mode) depending on sensors["temperature"]["temperature"]
         # set dc (level of AC) depending on termperature
         # depending on mode, output to motor/rgb led
 
 
-        if not sensors["presence"]["active"]:
+        if not sensors["presence"]["is_detected"]:
             sensors["air_conditioner"]["active"] = False
-        elif sensors["temperature"]["level"] < 21:
-            dc = (21 - sensors["temperature"]["level"]) * 10
+        elif sensors["temperature"]["temperature"] < 21:
+            dc = (21 - sensors["temperature"]["temperature"]) * 10
             sensors["air_conditioner"]["mode"] = "hot"
-        elif sensors["temperature"]["level"] > 24:
-            dc = (sensors["temperature"]["level"] - 24) * 10
+        elif sensors["temperature"]["temperature"] > 24:
+            dc = (sensors["temperature"]["temperature"] - 24) * 10
             sensors["air_conditioner"]["mode"] = "cold"
         else:
             dc = 0
@@ -293,11 +286,11 @@ def weatherSensor():
     DHT_SENSOR = Adafruit_DHT.DHT11
 
     while True:
-        if sensors["presence"]["active"]:
+        if sensors["presence"]["is_detected"]:
             # read sensor and time
-            sensors["humidity"]["level"], sensors["temperature"]["level"] = Adafruit_DHT.read_retry(DHT_SENSOR, DHT_PIN)
-            if sensors["humidity"]["level"] is not None and sensors["temperature"]["level"] is not None:
-                print("Temp={0:0.1f}C".format(sensors["temperature"]["level"]))
+            sensors["humidity"]["humidity"], sensors["temperature"]["temperature"] = Adafruit_DHT.read_retry(DHT_SENSOR, DHT_PIN)
+            if sensors["humidity"]["humidity"] is not None and sensors["temperature"]["temperature"] is not None:
+                print("Temp={0:0.1f}C".format(sensors["temperature"]["temperature"]))
                 print("Power:", dc)
             else:
                 print("Sensor failing.")
@@ -314,10 +307,10 @@ def button_callback():
     global sensors
     print("You have pressed the button")
     # toggle button (off -> on, on -> off)
-    if not sensors["presence"]["active"]:
-        sensors["presence"]["active"] = True
+    if not sensors["presence"]["is_detected"]:
+        sensors["presence"]["is_detected"] = True
     else:
-        sensors["presence"]["active"] = False
+        sensors["presence"]["is_detected"] = False
 
 
 def button():
@@ -342,6 +335,7 @@ def button():
 def on_connect(client, userdata, flags, rc):
     print("Raspberry connected to MQTT-2")
     client.subscribe(COMMAND_TOPIC)
+    print("Subscribed to", COMMAND_TOPIC)
 
 
 def on_message(client, userdata, msg):
@@ -352,7 +346,7 @@ def on_message(client, userdata, msg):
     topic = (msg.topic).split("/")
     if topic[-1] == "air-conditioner":
         print("Air conditioner command received:", msg.payload.decode())
-        # TODO
+        # TODO: commands receiver
 
 
 def connect_mqtt():
@@ -365,14 +359,17 @@ def connect_mqtt():
     client.loop_start()  # listen for commands
 
     while True:
-        client.publish(TEMPERATURE_TOPIC, payload=sensors["temperature"]["level"], qos=0, retain=False)
-        client.publish(HUMIDITY_TOPIC, payload=sensors["humidity"]["level"], qos=0, retain=False)
+        # TODO: change payloads to include ["active"] & JSON format
+        client.publish(TEMPERATURE_TOPIC, payload=sensors["temperature"]["temperature"], qos=0, retain=False)
+        client.publish(HUMIDITY_TOPIC, payload=sensors["humidity"]["humidity"], qos=0, retain=False)
         client.publish(IN_LIGHT_TOPIC, payload=sensors["inner_light"]["level"], qos=0, retain=False)
         client.publish(EX_LIGHT_TOPIC, payload=sensors["exterior_light"]["level"], qos=0, retain=False)
         client.publish(AIR_TOPIC, payload=dc, qos=0, retain=False)
-        client.publish(PRESENCE_TOPIC, payload=sensors["presence"]["active"], qos=0, retain=False)
-        client.publish(BLINDS_TOPIC, payload=sensors["blind"]["angle"], qos=0, retain=False)
+        client.publish(PRESENCE_TOPIC, payload=sensors["presence"]["is_detected"], qos=0, retain=False)
+        client.publish(BLINDS_TOPIC, payload=sensors["blinds"]["angle"], qos=0, retain=False)
         print("Sent to sensor data to topic", TELEMETRY_TOPIC)
+
+        time.sleep(5)
 
     client.loop_stop()
 

@@ -86,6 +86,8 @@ services:
       - ./frontend/app:/usr/local/apache2/htdocs
     depends_on:
       - webapp_backend
+    logging:
+      driver: "none"  # prevent logging of container (you can see it in the browser)
       
   webapp_backend: 
     build: ./webapp_backend
