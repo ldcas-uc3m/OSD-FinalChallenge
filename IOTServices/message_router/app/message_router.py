@@ -70,7 +70,7 @@ def on_message(client, userdata, msg):
             print("Published", room_name, "in", msg.topic, "topic")
 
     elif "telemetry" in topic:
-        payload = json.loads(msg.payload)  # unload payload
+        payload = json.loads(msg.payload.decode())  # unload payload
 
         room_name = topic[2]
 
