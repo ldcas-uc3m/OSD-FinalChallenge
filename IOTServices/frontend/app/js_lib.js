@@ -38,7 +38,7 @@ var draw_rooms = function(){
     }
 }
 
-$("#air_conditioner_mode").change(function(){
+$("#air_mode").change(function(){
     var value = $(this).val()
     $.ajax({
         type: "POST",
