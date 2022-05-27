@@ -336,7 +336,7 @@ def connect_mqtt_1():
 
 
 def connect_mqtt_2():
-    global curr_air_mode_comm
+    global curr_air_mode_comm, curr_air_level_comm, curr_blinds_comm, curr_in_light_mode_comm, curr_in_light_level_comm, curr_ex_light_mode_comm, curr_ex_light_level_comm
     
     client = mqtt.Client(ROOM_ID + "_Client_1884")
     client.username_pw_set(username=MQTT_USER, password=MQTT_PASSWORD)
