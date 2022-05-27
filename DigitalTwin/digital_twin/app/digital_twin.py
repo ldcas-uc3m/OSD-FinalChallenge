@@ -122,7 +122,7 @@ def randomize_sensors():
         },
         "air_conditioner": {
             "active": bool(random.randint(0, 1)),
-            "mode": "hot" if sensors["temperature"]["level"] < 21 else "cold", 
+            "mode": "hot" if sensors["temperature"]["temperature"] < 21 else "cold", 
             "level": random.randint(0, 100)
         },
         "blinds": {
