@@ -167,7 +167,7 @@ def on_connect_1883(client, userdata, flags, rc):
 def on_message_1833(client, userdata, msg):
     global room_number, TELEMETRY_TOPIC, TEMPERATURE_TOPIC, HUMIDITY_TOPIC, BLINDS_TOPIC, IN_LIGHT_TOPIC, EX_LIGHT_TOPIC, PRESENCE_TOPIC, AIR_TOPIC, DISCONN_TOPIC
 
-    print("Message received in MQTT-1 with topic", msg.topic, "and message", msg.payload.decode())
+    print("Message received in MQTT-1 with topic", msg.topic, "and message", msg.payload)
 
     topic = (msg.topic).split("/")
 
@@ -191,8 +191,8 @@ def on_message_1833(client, userdata, msg):
         # forward command
         global air_mode_comm, air_level_comm, blinds_comm, in_light_mode_comm, in_light_level_comm, ex_light_mode_comm, ex_light_level_comm
 
-        print("Received", topic[-1], "command, with payload", msg.payload.decode())
-        payload = json.loads(msg.payload.decode("utf-8"))
+        print("Received", topic[-1], "command, with payload", msg.payload)
+        payload = json.loads(msg.payload)
 
         # save command values
         if topic[-1] == "air-mode":
@@ -232,10 +232,10 @@ def on_message_1884(client, userdata, msg):
 
     global humidity, temperature, air_level, air_mode, blinds, in_light, ex_light, presence
 
-    print("Message received in MQTT-2 with topic", msg.topic, "and message", msg.payload.decode())
+    print("Message received in MQTT-2 with topic", msg.topic, "and message", msg.payload)
 
     topic = (msg.topic).split("/")
-    payload = msg.payload.decode()
+    payload = msg.payload
 
     # update values
     if topic[-1] == "temperature":
