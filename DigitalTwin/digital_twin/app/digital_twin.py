@@ -167,7 +167,7 @@ def on_connect_1883(client, userdata, flags, rc):
 def on_message_1833(client, userdata, msg):
     global room_number, TELEMETRY_TOPIC, TEMPERATURE_TOPIC, HUMIDITY_TOPIC, BLINDS_TOPIC, IN_LIGHT_TOPIC, EX_LIGHT_TOPIC, PRESENCE_TOPIC, AIR_TOPIC, DISCONN_TOPIC
 
-    print("Message received in MQTT-1 with topic", msg.topic, "and message", msg.payload)
+    print("Message received in MQTT-1 with topic", msg.topic, "and message", msg.payload.decode())
 
     topic = (msg.topic).split("/")
 
@@ -191,8 +191,8 @@ def on_message_1833(client, userdata, msg):
         # forward command
         global air_mode_comm, air_level_comm, blinds_comm, in_light_mode_comm, in_light_level_comm, ex_light_mode_comm, ex_light_level_comm
 
-        print("Received", topic[-1], "command, with payload", msg.payload)
-        payload = json.loads(msg.payload)
+        print("Received", topic[-1], "command, with payload", msg.payload.decode())
+        payload = json.loads(msg.payload.decode())
 
         # save command values
         if topic[-1] == "air-mode":
@@ -232,10 +232,10 @@ def on_message_1884(client, userdata, msg):
 
     global humidity, temperature, air_level, air_mode, blinds, in_light, ex_light, presence
 
-    print("Message received in MQTT-2 with topic", msg.topic, "and message", msg.payload)
+    print("Message received in MQTT-2 with topic", msg.topic, "and message", msg.payload.decode())
 
     topic = (msg.topic).split("/")
-    payload = msg.payload
+    payload = msg.payload.decode()
 
     # update values
     if topic[-1] == "temperature":
@@ -280,31 +280,31 @@ def connect_mqtt_1():
         # check if data has been received on mqtt-2
         if temperature != curr_temperature:
             # forward data to message router
-            client.publish(TEMPERATURE_TOPIC, payload = json.dumps(temperature, ensure_ascii=False), qos = 0, retain = False)
+            client.publish(TEMPERATURE_TOPIC, payload = temperature, qos = 0, retain = False)
             print("Sent to MQTT-1", temperature, "on topic", TEMPERATURE_TOPIC)
             curr_temperature = temperature  # update local data
         if humidity != curr_humidity:
-            client.publish(HUMIDITY_TOPIC, payload = json.dumps(humidity, ensure_ascii=False), qos = 0, retain = False)
+            client.publish(HUMIDITY_TOPIC, payload = humidity, qos = 0, retain = False)
             print("Sent to MQTT-1", humidity, "on topic", HUMIDITY_TOPIC)
             curr_humidity = humidity
         if air != curr_air:
-            client.publish(AIR_TOPIC, payload = json.dumps(air_level, ensure_ascii=False), qos = 0, retain = False)
+            client.publish(AIR_TOPIC, payload = air_level, qos = 0, retain = False)
             print("Sent to MQTT-1", air_level, "on topic", AIR_TOPIC)
             curr_air = air
         if in_light != curr_in_light:
-            client.publish(IN_LIGHT_TOPIC, payload = json.dumps(in_light, ensure_ascii=False), qos = 0, retain = False)
+            client.publish(IN_LIGHT_TOPIC, payload = in_light, qos = 0, retain = False)
             print("Sent to MQTT-1", in_light, "on topic", IN_LIGHT_TOPIC)
             curr_in_light = in_light
         if ex_light != curr_ex_light:
-            client.publish(EX_LIGHT_TOPIC, payload = json.dumps(ex_light, ensure_ascii=False), qos = 0, retain = False)
+            client.publish(EX_LIGHT_TOPIC, payload = ex_light, qos = 0, retain = False)
             print("Sent to MQTT-1", ex_light, "on topic", EX_LIGHT_TOPIC)
             curr_ex_light = ex_light
         if presence != curr_presence:
-            client.publish(PRESENCE_TOPIC, payload = json.dumps(presence, ensure_ascii=False), qos = 0, retain = False)
+            client.publish(PRESENCE_TOPIC, payload = presence, qos = 0, retain = False)
             print("Sent to MQTT-1", presence, "on topic", PRESENCE_TOPIC)
             curr_presence = presence
         if blinds != curr_blinds:
-            client.publish(BLINDS_TOPIC, payload = json.dumps(blinds, ensure_ascii=False), qos = 0, retain = False)
+            client.publish(BLINDS_TOPIC, payload = blinds, qos = 0, retain = False)
             print("Sent to MQTT-1", blinds, "on topic", BLINDS_TOPIC)
             curr_blinds = blinds
 
