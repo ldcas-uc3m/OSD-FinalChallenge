@@ -17,7 +17,7 @@ def device_state():
             MESSAGE_ROUTER_API_URL+"/device_state",
             json = params
         )
-        print("Forwarding to Message Router")
+        print("Forwarding command Message Router", file=os.sys.stderr)
         return json.dumps(r.json()), r.status_code
 
     elif request.method == 'GET':
@@ -32,4 +32,5 @@ DATA_INGESTION_API_URL = "http://"+os.getenv("DATA_INGESTION_API_ADDRESS")+":"+o
 MESSAGE_ROUTER_API_URL = "http://"+os.getenv("MESSAGE_ROUTER_API_ADDRESS")+":"+os.getenv("MESSAGE_ROUTER_API_PORT")
 HOST = os.getenv('HOST')
 PORT = os.getenv('PORT')
-app.run(host= HOST, port=PORT, debug=True)
+# app.run(host= HOST, port=PORT, debug=True)
+app.run(host= HOST, port=PORT)

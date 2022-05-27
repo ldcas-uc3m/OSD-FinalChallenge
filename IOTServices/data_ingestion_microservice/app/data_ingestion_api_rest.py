@@ -34,4 +34,5 @@ def device_state():
         return response, 200
 
 
-app.run(host=HOST, port=PORT, debug=True)
+# app.run(host=HOST, port=PORT, debug=True)
+app.run(host=HOST, port=PORT)

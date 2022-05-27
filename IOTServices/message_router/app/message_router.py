@@ -118,7 +118,7 @@ def send_command(params):
     else:
         return {"response":"Incorrect type param"}, 401
 
-    print("air-mode command message sent through" + topic)
+    print("command message sent through" + topic)
     return {"response":"Message successfully sent"}, 200
 
 
@@ -126,7 +126,7 @@ def send_command(params):
 def device_state():
     # GET requests will be blocked
     if request.method == "POST":
-        print("Received POST request")
+        print("Received POST request", file=os.sys.stderr)
 
         params = request.get_json()
         return send_command(params)
