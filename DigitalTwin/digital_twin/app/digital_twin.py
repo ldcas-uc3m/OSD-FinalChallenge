@@ -192,7 +192,7 @@ def on_message_1833(client, userdata, msg):
         global air_mode_comm, air_level_comm, blinds_comm, in_light_mode_comm, in_light_level_comm, ex_light_mode_comm, ex_light_level_comm
 
         print("Received", topic[-1], "command, with payload", msg.payload.decode())
-        payload = json.loads(msg.payload.decode())
+        payload = json.loads(msg.payload.decode("utf-8"))
 
         # save command values
         if topic[-1] == "air-mode":

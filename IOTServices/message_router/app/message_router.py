@@ -52,17 +52,17 @@ def on_message(client, userdata, msg):
     # decode data
 
     global current_temperature, current_air, current_blind, index_room
-    print("Message received in", msg.topic, "with message", msg.payload.decode())
+    print("Message received in", msg.topic, "with message", msg.payload.decode("utf-8"))
     topic = (msg.topic).split("/")
     
     if topic[-1] == "config":
         # configure client
-        if (saved_rooms.get(msg.payload.decode())== None):  # check room is not already saved
+        if (saved_rooms.get(msg.payload.decode("utf-8"))== None):  # check room is not already saved
             # change container id to a number to identify the room
             room_name = "Room" + str(index_room)
 
-            saved_rooms[msg.payload.decode()] = room_name  # save room
-            print("Digital Twin with id", msg.payload.decode(), "saved as", room_name)
+            saved_rooms[msg.payload.decode("utf-8")] = room_name  # save room
+            print("Digital Twin with id", msg.payload.decode("utf-8"), "saved as", room_name)
 
             index_room += 1
 
@@ -70,7 +70,7 @@ def on_message(client, userdata, msg):
             print("Published", room_name, "in", msg.topic, "topic")
 
     elif "telemetry" in topic:
-        payload = json.loads(msg.payload.decode())  # unload payload
+        payload = json.loads(msg.payload.decode("utf-8"))  # unload payload
 
         room_name = topic[2]
 
