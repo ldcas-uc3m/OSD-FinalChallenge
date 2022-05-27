@@ -33,6 +33,7 @@ AIR_TOPIC = ""
 BLINDS_TOPIC = ""
 IN_LIGHT_TOPIC = ""
 EX_LIGHT_TOPIC = ""
+DISCONN_TOPIC = ""
 PRESENCE_TOPIC = ""
 
 # device values
@@ -172,7 +173,7 @@ def on_message_1833(client, userdata, msg):
 
     if topic[-1] == "room":
         # setup room number
-        room_number = msg.payload.decode()
+        room_number = msg.payload.decode()  # we ALWAYS have to decode the payload
         print("Room number received as:", room_number)
 
         # update topics
@@ -221,6 +222,8 @@ def on_connect_1884(client, userdata, flags, rc):
     
     client.subscribe(TELEMETRY_TOPIC + "/+")
     print("Suscribed on MQTT-2 to", TELEMETRY_TOPIC + "/+")
+    client.subscribe(DISCONN_TOPIC)
+    print("Suscribed on MQTT-2 to", DISCONN_TOPIC)
 
 
 def on_message_1884(client, userdata, msg):
@@ -247,6 +250,10 @@ def on_message_1884(client, userdata, msg):
         ex_light = payload
     elif topic[-1] == "presence":
         presence = payload
+    
+    # TODO: disconnect
+    # elif topic[-1] == "disconn":
+    #     # set all sensors as i
 
 
 # ---
@@ -319,6 +326,7 @@ def connect_mqtt_1():
         client.publish(HUMIDITY_TOPIC, payload = json_humidity, qos = 0, retain = False)
         client.publish(BLINDS_TOPIC, payload = json_blinds, qos = 0, retain = False)
         client.publish(PRESENCE_TOPIC, payload = json_presence, qos = 0, retain = False)
+        client.publish(PRESENCE_TOPIC, payload = json_air, qos = 0, retain = False)
         client.publish(IN_LIGHT_TOPIC, payload = json_inner_light, qos = 0, retain = False)
         client.publish(EX_LIGHT_TOPIC, payload = json_exterior_light, qos = 0, retain = False)
         print("Sent to sensor data to topic", TELEMETRY_TOPIC)
@@ -344,6 +352,7 @@ def connect_mqtt_2():
     IN_LIGHT_LEVEL_COMAND_TOPIC = "hotel/rooms/"+ room_number +"command/inner-light-level"
     EX_LIGHT_MODE_COMAND_TOPIC = "hotel/rooms/"+ room_number +"command/exterior-light-mode"
     EX_LIGHT_LEVEL_COMAND_TOPIC = "hotel/rooms/"+ room_number +"command/exterior-light-level"
+
 
     # main loop
     while True:

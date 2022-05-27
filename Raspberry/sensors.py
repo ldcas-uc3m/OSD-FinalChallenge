@@ -89,6 +89,7 @@ MQTT_PASSWORD = "dso_password"
 ROOM_ID = "Room1"
 
 COMMAND_TOPIC = "hotel/rooms/" + ROOM_ID + "/command"
+DISCONN_TOPIC = "hotel/rooms/" + ROOM_ID + "/disconn"
 TELEMETRY_TOPIC = "hotel/rooms/" + ROOM_ID + "/telemetry"
 TEMPERATURE_TOPIC = TELEMETRY_TOPIC + "/temperature"
 HUMIDITY_TOPIC = TELEMETRY_TOPIC + "/humidity"
@@ -172,12 +173,21 @@ def update_servo(angle):
 
 
 def servo():
-    servo_pwm.start(0)
-    # In servo terms here, 2 means 0 and 12 means 180 degree
-    servo_pwm.ChangeDutyCycle(2 + (sensors["blinds"]["angle"] / 18))
+    global sensors
 
-    time.sleep(0.5)
-    servo_pwm.ChangeDutyCycle(0)
+    try:
+        servo_pwm.start(0)
+        # In servo terms here, 2 means 0 and 12 means 180 degree
+        servo_pwm.ChangeDutyCycle(2 + (sensors["blinds"]["angle"] / 18))
+
+        time.sleep(0.5)
+        servo_pwm.ChangeDutyCycle(0)
+
+        sensors["blinds"]["active"] = True
+
+    except:
+        sensors["blinds"]["active"] = False
+
 
 
 # we will recieve values in this funtion to update the global variable
@@ -194,11 +204,18 @@ def update_blu(status, intensity):
 
 def blu():
     global sensors
-    blu_pwm.start(0)
-    if sensors["exterior_light"]["on"]:
-        blu_pwm.ChangeDutyCycle(sensors["exterior_light"]["level"])
-    else:
-        blu_pwm.ChangeDutyCycle(0)
+
+    try:
+        blu_pwm.start(0)
+        if sensors["exterior_light"]["on"]:
+            blu_pwm.ChangeDutyCycle(sensors["exterior_light"]["level"])
+        else:
+            blu_pwm.ChangeDutyCycle(0)
+
+        sensors["exterior_light"]["active"] = True
+        
+    except:
+        sensors["exterior_light"]["active"] = False
 
 
 def update_white(status, intensity):
@@ -213,15 +230,23 @@ def update_white(status, intensity):
 
 
 def white():
-    white_pwm.start(0)
-    if sensors["inner_light"]["on"]:
-        white_pwm.ChangeDutyCycle(sensors["inner_light"]["level"])
-    else:
-        white_pwm.ChangeDutyCycle(0)
+    global sensors
+
+    try:
+        white_pwm.start(0)
+        if sensors["inner_light"]["on"]:
+            white_pwm.ChangeDutyCycle(sensors["inner_light"]["level"])
+        else:
+            white_pwm.ChangeDutyCycle(0)
+        
+        sensors["inner_light"]["active"] = True
+
+    except:
+            sensors["inner_light"]["active"] = False
 
 
 def motor():
-    global dc
+    global dc, sensors
 
     motor_pwm.start(0)
     while True:
@@ -242,41 +267,48 @@ def motor():
             dc = 0
             sensors["air_conditioner"]["mode"] = "off"
 
-        if sensors["air_conditioner"]["mode"] == "off":
-            GPIO.output(MOTOR1A, GPIO.LOW)
-            GPIO.output(MOTOR1B, GPIO.LOW)
+        try:
+            if sensors["air_conditioner"]["mode"] == "off":
+                GPIO.output(MOTOR1A, GPIO.LOW)
+                GPIO.output(MOTOR1B, GPIO.LOW)
 
-            GPIO.output(GREEN_PIN, GPIO.HIGH)
-            GPIO.output(RED_PIN, GPIO.LOW)
-            GPIO.output(BLUE_PIN, GPIO.LOW)
-        elif sensors["air_conditioner"]["mode"] == "hot":
-            # go reverse
-            GPIO.output(MOTOR1A, GPIO.LOW)
-            GPIO.output(MOTOR1B, GPIO.HIGH)
+                GPIO.output(GREEN_PIN, GPIO.HIGH)
+                GPIO.output(RED_PIN, GPIO.LOW)
+                GPIO.output(BLUE_PIN, GPIO.LOW)
+            elif sensors["air_conditioner"]["mode"] == "hot":
+                # go reverse
+                GPIO.output(MOTOR1A, GPIO.LOW)
+                GPIO.output(MOTOR1B, GPIO.HIGH)
 
-            GPIO.output(GREEN_PIN, GPIO.LOW)
-            GPIO.output(RED_PIN, GPIO.HIGH)
-            GPIO.output(BLUE_PIN, GPIO.LOW)
+                GPIO.output(GREEN_PIN, GPIO.LOW)
+                GPIO.output(RED_PIN, GPIO.HIGH)
+                GPIO.output(BLUE_PIN, GPIO.LOW)
 
-        elif sensors["air_conditioner"]["mode"] == "cold":
-            # go forward
-            GPIO.output(MOTOR1A, GPIO.HIGH)
-            GPIO.output(MOTOR1B, GPIO.LOW)
+            elif sensors["air_conditioner"]["mode"] == "cold":
+                # go forward
+                GPIO.output(MOTOR1A, GPIO.HIGH)
+                GPIO.output(MOTOR1B, GPIO.LOW)
 
-            GPIO.output(GREEN_PIN, GPIO.LOW)
-            GPIO.output(RED_PIN, GPIO.LOW)
-            GPIO.output(BLUE_PIN, GPIO.HIGH)
+                GPIO.output(GREEN_PIN, GPIO.LOW)
+                GPIO.output(RED_PIN, GPIO.LOW)
+                GPIO.output(BLUE_PIN, GPIO.HIGH)
 
-        elif sensors["air_conditioner"]["active"] == False:
-            GPIO.output(MOTOR1A, GPIO.LOW)
-            GPIO.output(MOTOR1B, GPIO.LOW)
+            elif sensors["air_conditioner"]["active"] == False:
+                GPIO.output(MOTOR1A, GPIO.LOW)
+                GPIO.output(MOTOR1B, GPIO.LOW)
 
-            GPIO.output(GREEN_PIN, GPIO.HIGH)
-            GPIO.output(RED_PIN, GPIO.LOW)
-            GPIO.output(BLUE_PIN, GPIO.LOW)
+                GPIO.output(GREEN_PIN, GPIO.HIGH)
+                GPIO.output(RED_PIN, GPIO.LOW)
+                GPIO.output(BLUE_PIN, GPIO.LOW)
 
 
-        motor_pwm.ChangeDutyCycle(dc)
+            motor_pwm.ChangeDutyCycle(dc)
+
+            sensors["air_conditioner"]["active"] = True
+
+        except:  # an error ocurred
+            sensors["air_conditioner"]["active"] = False
+
         time.sleep(0.5)  # so it consumes less resources
 
 
@@ -292,8 +324,12 @@ def weatherSensor():
             if sensors["humidity"]["humidity"] is not None and sensors["temperature"]["temperature"] is not None:
                 print("Temp={0:0.1f}C".format(sensors["temperature"]["temperature"]))
                 print("Power:", dc)
+                sensors["humidity"]["active"] = True
+                sensors["temperature"]["active"] = True
             else:
                 print("Sensor failing.")
+                sensors["humidity"]["active"] = False
+                sensors["temperature"]["active"] = False
 
             time.sleep(3)
 
@@ -315,18 +351,27 @@ def button_callback():
 
 def button():
     global sensors
+
     GPIO.setup(BUTTON_GPIO, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     pressed = False
     while True:
+        try:
 
-        # Button is pressed when pin is LOW
-        if not GPIO.input(BUTTON_GPIO):
-            if not pressed:
-                button_callback()
-        # button not pressed or released
-        else:
-            pressed = False
+            # Button is pressed when pin is LOW
+            if not GPIO.input(BUTTON_GPIO):
+                if not pressed:
+                    button_callback()
+            # button not pressed or released
+            else:
+                pressed = False
+            
+            sensors["presence"]["active"] = True
+
+        except:
+            sensors["presence"]["active"] = False
+            
         time.sleep(0.1)
+
 
 
 # ---
@@ -349,29 +394,50 @@ def on_message(client, userdata, msg):
         # TODO: commands receiver
 
 
+def on_disconnect(client, userdata, rc):
+    print("Disconnected from MQTT")
+    # set sensors as inactive
+    sensors["air_conditioner"]["active"] = False
+    sensors["temperature"]["active"] = False
+    sensors["humidity"]["active"] = False
+    sensors["presence"]["active"] = False
+    sensors["blinds"]["active"] = False
+
+    client.connected_flag=False
+    client.disconnect_flag=True
+
+
+def send_data(client):
+    # sends the sensor data
+    # TODO: change payloads to include ["active"] & JSON format
+    client.publish(TEMPERATURE_TOPIC, payload=sensors["temperature"]["temperature"], qos=0, retain=False)
+    client.publish(HUMIDITY_TOPIC, payload=sensors["humidity"]["humidity"], qos=0, retain=False)
+    client.publish(IN_LIGHT_TOPIC, payload=sensors["inner_light"]["level"], qos=0, retain=False)
+    client.publish(EX_LIGHT_TOPIC, payload=sensors["exterior_light"]["level"], qos=0, retain=False)
+    client.publish(AIR_TOPIC, payload=dc, qos=0, retain=False)
+    client.publish(PRESENCE_TOPIC, payload=sensors["presence"]["is_detected"], qos=0, retain=False)
+    client.publish(BLINDS_TOPIC, payload=sensors["blinds"]["angle"], qos=0, retain=False)
+    print("Sent to sensor data to topic", TELEMETRY_TOPIC)
+    # TODO: send data function
+
+
 def connect_mqtt():
     client = mqtt.Client()
     client.username_pw_set(username=MQTT_USER, password=MQTT_PASSWORD)
     client.on_connect = on_connect
     client.on_message = on_message
+    client.on_disconnect = on_disconnect
+    client.will_set(DISCONN_TOPIC)  # setup last will
     client.connect(MQTT_SERVER, MQTT_PORT, 60)
 
     client.loop_start()  # listen for commands
 
     while True:
-        # TODO: change payloads to include ["active"] & JSON format
-        client.publish(TEMPERATURE_TOPIC, payload=sensors["temperature"]["temperature"], qos=0, retain=False)
-        client.publish(HUMIDITY_TOPIC, payload=sensors["humidity"]["humidity"], qos=0, retain=False)
-        client.publish(IN_LIGHT_TOPIC, payload=sensors["inner_light"]["level"], qos=0, retain=False)
-        client.publish(EX_LIGHT_TOPIC, payload=sensors["exterior_light"]["level"], qos=0, retain=False)
-        client.publish(AIR_TOPIC, payload=dc, qos=0, retain=False)
-        client.publish(PRESENCE_TOPIC, payload=sensors["presence"]["is_detected"], qos=0, retain=False)
-        client.publish(BLINDS_TOPIC, payload=sensors["blinds"]["angle"], qos=0, retain=False)
-        print("Sent to sensor data to topic", TELEMETRY_TOPIC)
+        send_data(client)
 
         time.sleep(5)
 
-    client.loop_stop()
+    client.loop_stop()  # not really needed, but idk
 
 
 if __name__ == "__main__":

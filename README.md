@@ -6,6 +6,14 @@ Universidad Carlos III de Madrid
 
 Implementation of an IOT solution for a Smart Hotel.
 
+## Preface: A note for the teachers
+Hello there!  
+  
+We know this is a _big_, _chonky_ README, but it's mainly documentation for the future (so that in like, 10 years, we can look back at this project and not die trying to figure out how everything worked).  
+  
+You can read it all, but the parts you're probably more interested in are the [Implementation](#implementation) chapter, that covers how it all works (we changed stuff a bit, and added some other stuff such as the Adminer), the [Rooms Management Microservice](#rooms-management-microservice) architecture part, and the pin layout for the RPi you can find in [Execution](#execution), step 5.  
+  
+Regards!
 
 ## Index
 1. [Problem description](#problem-description)
@@ -18,6 +26,7 @@ Implementation of an IOT solution for a Smart Hotel.
         5. [Data Ingestion microservice/ReST API](#data-ingestion-microservicerest-api)
         6. [Webapp Backend/ReST API](#webapp-backendrest-api)
         7. [Frontend](#frontend)
+        8. [Rooms Management Microservice](#rooms-management-microservice)
     2. [Implementation](#implementation)
         1. [`raspberry`](#raspberry)
         2. [`digital_raspberry`](#digitalraspberry)
@@ -87,8 +96,9 @@ This API is in charge of managing the requests sent from the Frontend.
 It asks for the data to the Data Ingestion microservice, and passes the commands to the Message Router.
 
 #### Website Frontend
+This website actuates as an interface to monitor the state of each room, and send some commands to change the state.
 
-
+#### Rooms Management Microservice
 
 ### Implementation
 We've chosen to use Docker and Docker-compose to implement our solutions, for its reliability, ease of use, and scalability.  
@@ -104,13 +114,20 @@ The RPi is connected to a circuit with a temperature & humidity sensor (DHT11), 
 It does nothing until the button is pressed, that is, until presence is detected. If the button is pressed again, it understand there is no presence anymore.  
 While there is presence, it reads the temperature and humidity of the room and, depending on the temperature, it turns the motor backwards (pump hot air, if temperature < 21ºC or forwards (pump cold air, if temperature > 24ºC). Using Pulse Width Modulation, the motor is run faster the further away from the limit temperature it is, that is, the hotter it is, the more cold air is pushed. If temperature is between 21ºC and 24ºC, the motor stays on standby.  
 The RGB LED signals the state of the AC: it turs blue if it's in cold mode, red if it's in hot mode, and green if it's in standby.  
-The servo motor...  
-The other lights...  
+The servo motor is used to control the blinds, from 0º (closed) to 180º (open).  
+The other lights also use PWMs to control the intensity, and can be turned on or off.
+<!-- TODO: describe automatic stuff -->
   
 The raspberry is also able to receive commands from the MQTT-2, which overwrite its state, and are able to control the devices.  
 The commands are:
-- dfasd
-  
+- `air-mode`: Change the air conditioner mode (cold, hot, off)  
+- `air-level`: Change the air conditioner intensity  
+- `blinds`: Change the value of the blinds  
+- `inner-light-mode`: Change the mode of the inner light (on/off)  
+- `inner-light-level`: Change the intensity of the inner light  
+- `exterior-light-mode`: Change the mode of the exterior light (on/off)  
+- `exterior-light-level`: Change the intensity of the exterior light  
+
 Each 5 seconds, regardless of presence, the raspberry sends all of its device/sensor information to the MQTT-2.  
   
 _Note that each RPi has to have a hard-wired `ROOM_ID`._
@@ -120,6 +137,9 @@ This is not used in the final implementation (that's why it's commented out on t
 It emulates the Raspberry Pies, generating random device/sensor data and sending it to the MQTT-2, as a real RPi would do.
 
 #### `mqtt-1` & `mqtt-2`
+We implement some Mosquitto routers in order to transmit messages between the IOT devices, as the Publicator/Subscriber model works perfectly for our needs, giving flexibility.  
+These containers are mounted on simple Debian images, and configured with an user and password.  
+Using the ports feature of docker-compose, we can build both of them from the same Dockerfile, and make MQTT-1 listen, on the same machine, through port `1883` (the default) and MQTT-2 through `1884`.
 
 ##### Topics
 The topics implemented on the MQTTs are the following:
@@ -128,22 +148,20 @@ This topic is used as a "handshake" between a Digital Twin and the Message Route
 The Digital Twin sends its id (docker container id) when it's connected.
     - `/rooms`: When the Message router receives
 - Telemetry: `hotel/rooms/<room>/telemetry`  
-sdf
-    - `/temperature`:  
+This topic is used to transmit information about the sensors/devices state of the rooms.
+    - `/temperature`: Temperature sensed in the room  
     Pakage structure: `{ "active": <bool>, "value": <int (ºC)> }`
-    - `/humidity`:  
+    - `/humidity`: Temperature sensed in the room  
     Pakage structure: `{ "active": <bool>, "value": <int (%)> }`
-    - `/presence`:  
+    - `/presence`: If presence is sensed in the room.  
     Pakage structure: `{ "active": <bool>, "value": <bool> }`
-    - `/blinds`:  
+    - `/blinds`: State of the blinds in the room  
     Pakage structure: `{ "active": <bool>, "value": <int (%)> }`
-    - `/temperature`:  
-    Pakage structure: `{ "active": <bool>, "value": <int (ºC)> }`
-    - `/air`: hkjhf  
+    - `/air`: Mode and level of the AC in the room  
     Pakage structure: `{ "active": <bool>, "mode": <"cold" | "hot" | "off">, "value": <int from 0 to 100 (%)> }`
-    - `/inner-light`: hkjhf  
+    - `/inner-light`: State and level of the inner light in the room  
     Pakage structure: `{ "active": <bool>, "on": <bool>, "value": <int from 0 to 100 (%)> }`
-    - `/exterior-light`: hkjhf  
+    - `/exterior-light`: State and level of the exterior light in the room  
     Pakage structure: `{ "active": <bool>, "on": <bool>, "value": <int from 0 to 100 (%)> }`
 
 - Commands: `hotel/rooms/<room>/command`  
@@ -163,6 +181,9 @@ These commands are sent from the frontend to the RPis, in order to change the be
     - `/exterior-light-level`: Change the intensity of the exterior light  
     Pakage structure: `{ "level": <int from 0 to 100 (%)> }`
 
+- RPi Disconnection: `hotel/rooms/<room>/disconn`  
+A message through this topic is used as a LWT (Last Will and Testament) of an RPi client, when it suddenly disconnects, and sets all the sensors as inactive.
+
 ##### Subscriptions
 Each client is subscribed to different topics, as such:
 - MQTT-1:
@@ -170,7 +191,7 @@ Each client is subscribed to different topics, as such:
     - `digital_twin`: `hotel/rooms/<id>/config/rooms`, `hotel/rooms/<room_id>/command/+`
 - MQTT-2:
     - `raspberry`/`digital_raspberry`: `hotel/rooms/<room_id>/command/+`
-    - `digital_twin`: `hotel/rooms/<room_id>/telemetry/+`
+    - `digital_twin`: `hotel/rooms/<room_id>/telemetry/+`, `hotel/rooms/<room>/disconn`
 
 #### `digital_twin`
 
@@ -182,7 +203,7 @@ Each client is subscribed to different topics, as such:
 
 
 #### `adminer`
-
+The Adminer image provides a web interface for the mariaDB, and it uses port `8080` for the website. 
 
 #### `data_ingestion_microservice`
 
@@ -226,6 +247,7 @@ sudo apt install pip -y
 5. Setup the circuit on the Raspberry Pi, as such:  
 
 ![Raspberry Pi circuit diagram](img/RPi_diagram.png)  
+<!-- TODO: Update RPi diagram -->
 
 The pins are:
 
@@ -239,6 +261,8 @@ The pins are:
 | BLUE    | GPIO18   |
 | GREEN   | GPIO27   |
 | BUTTON  | GPIO16   |
+| DHT     | GPIO04   |
+| SERVO   | GPIO14   |
 
 6. On the IOTServices machine, run:
 ```bash

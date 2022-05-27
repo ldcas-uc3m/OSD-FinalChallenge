@@ -12,6 +12,7 @@ MQTT_PASSWORD = os.getenv("MQTT_PASSWORD")
 # topics
 COMMAND_TOPIC = "hotel/rooms/" + ROOM_ID + "/command/+"
 TELEMETRY_TOPIC = "hotel/rooms/" + ROOM_ID + "/telemetry"
+DISCONN_TOPIC = "hotel/rooms/" + ROOM_ID + "/disconn"
 TEMPERATURE_TOPIC = TELEMETRY_TOPIC + "/temperature"
 HUMIDITY_TOPIC = TELEMETRY_TOPIC + "/humidity"
 AIR_TOPIC = TELEMETRY_TOPIC + "/air-conditioner"
@@ -139,6 +140,7 @@ if __name__ == "__main__":
     client = mqtt.Client()
     client.username_pw_set(username=MQTT_USER, password=MQTT_PASSWORD)
     client.on_connect = on_connect
+    client.will_set(DISCONN_TOPIC)  # setup last will
     client.connect(MQTT_SERVER, MQTT_PORT, 60)  # 60 is the ping time
     
 
