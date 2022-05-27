@@ -10,7 +10,7 @@ CORS(app)
 @app.route("/device_state", methods=['GET', 'POST'])
 def device_state():
     if request.method == 'POST':
-        print("Received POST request")
+        print("Received POST request", file=os.sys.stderr)
 
         params = request.get_json()
         r = requests.post(

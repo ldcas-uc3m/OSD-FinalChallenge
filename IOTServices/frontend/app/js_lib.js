@@ -50,6 +50,7 @@ $("#air_conditioner_mode").change(function(){
         }),
         contentType: 'application/json'
     });
+    console.log("Posting command")
 })
 
 
