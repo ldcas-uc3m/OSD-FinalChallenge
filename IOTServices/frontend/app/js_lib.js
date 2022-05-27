@@ -64,7 +64,8 @@ $("#inner_light_mode").change(function(){
             "type":"inner-light-mode",
             "value":value,
         }),
-        contentType: 'application/json'
+        contentType: 'application/json',
+        dataType: 'application/json'
     });
 })
 
