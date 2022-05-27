@@ -40,17 +40,14 @@ var draw_rooms = function(){
 
 $("#air_mode").change(function(){
     var value = $(this).val()
-    var string = {
-            "room":$("#room_id").text(),
-            "type":"air-mode",
-            "value":value,
-        }
-
     $.ajax({
         type: "POST",
         url: "http://" + backend_api_address + ":5001/device_state",
-        data: JSON.stringify(string),
-        dataType: 'application/json',
+        data: JSON.stringify({
+            "room":$("#room_id").text(),
+            "type":"air-mode",
+            "value":value,
+        }),
         contentType: 'application/json'
     });
     console.log("Posting command")
@@ -82,4 +79,4 @@ $("#rooms").on("click", "td", function() {
 });
 
 draw_rooms()
-setInterval(get_current_sensor_data,2000)
+setInterval(get_current_sensor_data,5000)
