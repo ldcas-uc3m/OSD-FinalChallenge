@@ -2,7 +2,7 @@
  * Javascript file to implement client side usability for 
  * Operating Systems Desing exercises.
  */
-var backend_api_address = "34.159.103.125"
+var backend_api_address = "34.159.11.81"
 
 var get_current_sensor_data = function() {
     console.log("Requesting data from backend")
