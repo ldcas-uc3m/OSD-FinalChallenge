@@ -70,10 +70,10 @@ $("#inner_light_mode").change(function(){
 $("#rooms").on("click", "td", function() {
     // unpackage data from backend
     console.log($(this).data())
-    $("#room_id").text($( this ).attr("id") || "");
-    $("#temperature_value").text($( this ).data("temperature") || "");
+    $("#room_id").text($( this ).attr("room") || "");
+    $("#temperature_value").text($( this ).data("temperature") || "0");
     $("#presence_value").text($( this ).data("presence") || "0");
-    $("#air_conditioner_value").text($( this ).data("air-level") || "");
+    $("#air_conditioner_value").text($( this ).data("air-level") || "0");
     $("#air_conditioner_mode").val($( this ).data("air-mode"));
 });
 
