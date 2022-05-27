@@ -165,7 +165,7 @@ def on_connect_1883(client, userdata, flags, rc):
 
 
 def on_message_1833(client, userdata, msg):
-    global room_number, TELEMETRY_TOPIC, TEMPERATURE_TOPIC, HUMIDITY_TOPIC, BLINDS_TOPIC, IN_LIGHT_TOPIC, EX_LIGHT_TOPIC, PRESENCE_TOPIC, AIR_TOPIC
+    global room_number, TELEMETRY_TOPIC, TEMPERATURE_TOPIC, HUMIDITY_TOPIC, BLINDS_TOPIC, IN_LIGHT_TOPIC, EX_LIGHT_TOPIC, PRESENCE_TOPIC, AIR_TOPIC, DISCONN_TOPIC
 
     print("Message received in MQTT-1 with topic", msg.topic, "and message", msg.payload.decode())
 
@@ -185,6 +185,7 @@ def on_message_1833(client, userdata, msg):
         IN_LIGHT_TOPIC = TELEMETRY_TOPIC + "/inner-light"
         EX_LIGHT_TOPIC = TELEMETRY_TOPIC + "/exterior-light"
         PRESENCE_TOPIC = TELEMETRY_TOPIC + "/presence"
+        DISCONN_TOPIC = "hotel/rooms/" + room_number + "/disconn"
 
     elif "command" in topic:
         # forward command
