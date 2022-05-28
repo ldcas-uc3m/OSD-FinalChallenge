@@ -140,7 +140,7 @@ if __name__ == "__main__":
     client = mqtt.Client()
     client.username_pw_set(username=MQTT_USER, password=MQTT_PASSWORD)
     client.on_connect = on_connect
-    client.on_messaon_message =on_message
+    client.on_message =on_message
     client.will_set(DISCONN_TOPIC)  # setup last will
     client.connect(MQTT_SERVER, MQTT_PORT, 60)  # 60 is the ping time
     
