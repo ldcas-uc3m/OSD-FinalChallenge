@@ -3,10 +3,13 @@
  * Operating Systems Desing exercises.
  */
 var backend_api_address = "34.159.11.81"
+var backend_api_port = "5001"
+
+var backend_url = "http://" + backend_api_address + ":" + backend_api_port + "/device_state"
 
 var get_current_sensor_data = function() {
     console.log("Requesting data from backend")
-    $.getJSON("http://" + backend_api_address + ":5001/device_state", function(data) {
+    $.getJSON(backend_url, function(data) {
         $.each(data, function(index, item) {
           $("#"+item.room).data(item.type, item.value)
         //   console.log(item.room)
@@ -42,7 +45,7 @@ $("#air_mode").change(function(){
     var value = $(this).val()
     $.ajax({
         type: "POST",
-        url: "http://" + backend_api_address + ":5001/device_state",
+        url: backend_url,
         data: JSON.stringify({
             "room":$("#room_id").text(),
             "type":"air-mode",
@@ -58,14 +61,13 @@ $("#inner_light_mode").change(function(){
     var value = $(this).val()
     $.ajax({
         type: "POST",
-        url: "http://" + backend_api_address + ":5001/device_state",
+        url: backend_url,
         data: JSON.stringify({
             "room":$("#room_id").text(),
             "type":"inner-light-mode",
             "value":value,
         }),
         contentType: 'application/json',
-        dataType: 'application/json'
     });
 })
 
@@ -73,9 +75,10 @@ $("#rooms").on("click", "td", function() {
     // unpackage data from backend
     $("#room_id").text($( this ).attr("id") || "");
     $("#temperature_value").text($( this ).data("temperature") || "0");
+    $("#humidity_value").text($( this ).data("humidity") || "0");
     $("#presence_value").text($( this ).data("presence") || "0");
-    $("#air_conditioner_value").text($( this ).data("air-level") || "0");
-    $("#air_conditioner_mode").val($( this ).data("air-mode"));
+    $("#air_value").text($( this ).data("air-level") || "0");
+    $("#air_mode").val($( this ).data("air-mode"));
 });
 
 draw_rooms()
