@@ -360,13 +360,13 @@ def connect_mqtt_2():
     client.loop_start()
 
     # setup topics
-    AIR_MODE_COMMAND_TOPIC = "hotel/rooms/"+ room_number +"command/air-mode"
-    AIR_LEVEL_COMMAND_TOPIC = "hotel/rooms/"+ room_number +"command/air-level"
-    BLINDS_COMMAND_TOPIC = "hotel/rooms/"+ room_number +"command/blinds"
-    IN_LIGHT_MODE_COMMAND_TOPIC = "hotel/rooms/"+ room_number +"command/inner-light-mode"
-    IN_LIGHT_LEVEL_COMMAND_TOPIC = "hotel/rooms/"+ room_number +"command/inner-light-level"
-    EX_LIGHT_MODE_COMMAND_TOPIC = "hotel/rooms/"+ room_number +"command/exterior-light-mode"
-    EX_LIGHT_LEVEL_COMMAND_TOPIC = "hotel/rooms/"+ room_number +"command/exterior-light-level"
+    AIR_MODE_COMMAND_TOPIC = "hotel/rooms/" + room_number + "/command/air-mode"
+    AIR_LEVEL_COMMAND_TOPIC = "hotel/rooms/" + room_number + "/command/air-level"
+    BLINDS_COMMAND_TOPIC = "hotel/rooms/" + room_number + "/command/blinds"
+    IN_LIGHT_MODE_COMMAND_TOPIC = "hotel/rooms/" + room_number + "/command/inner-light-mode"
+    IN_LIGHT_LEVEL_COMMAND_TOPIC = "hotel/rooms/" + room_number + "/command/inner-light-level"
+    EX_LIGHT_MODE_COMMAND_TOPIC = "hotel/rooms/" + room_number + "/command/exterior-light-mode"
+    EX_LIGHT_LEVEL_COMMAND_TOPIC = "hotel/rooms/" + room_number + "/command/exterior-light-level"
 
 
     # main loop
