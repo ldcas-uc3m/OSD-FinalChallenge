@@ -85,10 +85,13 @@ def on_message(client, userdata, msg):
                     DATA_INGESTION_API_URL + "/device_state",
                     json={"room":room_name, "type": topic[-1] + "-level", "value":level}
                 )
+                print("Sent", {"room":room_name, "type": topic[-1] + "-level", "value":level}, "to Data Ingestion API")
+
                 requests.post(
                     DATA_INGESTION_API_URL+"/device_state",
                     json={"room":room_name, "type": topic[-1] + "-mode", "value":mode}
                 )
+                print("Sent", {"room":room_name, "type": topic[-1] + "-mode", "value":mode}, "to Data Ingestion API")
 
             elif topic[-1] in ("inner-light", "exterior-light"):
                 level = payload["value"]
@@ -98,17 +101,21 @@ def on_message(client, userdata, msg):
                     DATA_INGESTION_API_URL + "/device_state",
                     json={"room":room_name, "type": topic[-1] + "-level", "value":level}
                 )
+                print("Sent", {"room":room_name, "type": topic[-1] + "-level", "value":level}, "to Data Ingestion API")
+
                 requests.post(
                     DATA_INGESTION_API_URL+"/device_state",
                     json={"room":room_name, "type": topic[-1] + "-mode", "value":mode}
                 )
+                print("Sent", {"room":room_name, "type": topic[-1] + "-mode", "value":mode}, "to Data Ingestion API")
+                
             else:
                 # normal case, post data to REST API
                 value = payload["value"]
                 data = {"room": room_name, "type": topic[-1], "value": value}
                 requests.post(DATA_INGESTION_API_URL + "/device_state", json={"room": room_name, "type": topic[-1], "value": value})
-            
-            print("Sent", data, "to Data Ingestion API")
+
+                print("Sent", data, "to Data Ingestion API")
         
 
 # ---
