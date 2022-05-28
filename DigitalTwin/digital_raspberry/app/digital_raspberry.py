@@ -105,7 +105,7 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, msg):
     global sensors
 
-    print("Message received in MQTT-2 with topic", msg.topic, "and message", msg.payload.decode())
+    # print("Message received with topic", msg.topic, "and message", msg.payload.decode())
 
     topic = (msg.topic).split("/")
     payload = json.loads(msg.payload.decode())
@@ -140,9 +140,11 @@ if __name__ == "__main__":
     client = mqtt.Client()
     client.username_pw_set(username=MQTT_USER, password=MQTT_PASSWORD)
     client.on_connect = on_connect
+    client.on_messaon_message =on_message
     client.will_set(DISCONN_TOPIC)  # setup last will
     client.connect(MQTT_SERVER, MQTT_PORT, 60)  # 60 is the ping time
     
+    client.loop_start()  # listen for commands
 
     # MAIN LOOP
     while True:
@@ -168,3 +170,5 @@ if __name__ == "__main__":
         print("Sent sensor data to topic", TELEMETRY_TOPIC)
 
         time.sleep(10)
+
+    client.loop_stop()
