@@ -71,21 +71,14 @@ def get_device_state():
                     print("No results found for", room, device)
                     continue
                 else:
-                    value = mycursor.fetchone()  # fetch result -> returns a tuple
+                    value = mycursor.fetchone()  # fetch result
 
-                    if value is None:
+                    if value is not None:  # we don't want to send null info
                         response.append({
                             "room": room,
                             "type": device,
-                            "value": None
+                            "value": value[0]  # the query returns a tuple
                             })
-                    else:
-                        response.append({
-                            "room": room,
-                            "type": device,
-                            "value": value[0]
-                            })
-
 
         mydb.close()
         return response
