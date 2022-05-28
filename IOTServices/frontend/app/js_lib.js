@@ -44,7 +44,7 @@ $("#air_mode").change(function(){
         type: "POST",
         url: "http://" + backend_api_address + ":5001/device_state",
         data: JSON.stringify({
-            "room":$("#room_id").text(),
+            "room":$("#id").text(),
             "type":"air-mode",
             "value":value,
         }),

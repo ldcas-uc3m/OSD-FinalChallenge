@@ -12,7 +12,7 @@ def device_state():
     if request.method == 'POST':
         print("Received POST request", file=os.sys.stderr)
 
-        params = json.dumps(request.get_json())
+        params = request.get_json()
         r = requests.post(
             MESSAGE_ROUTER_API_URL+"/device_state",
             json = params
