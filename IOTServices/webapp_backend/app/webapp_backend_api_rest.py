@@ -20,14 +20,14 @@ CORS(app)
 @app.route("/device_state", methods=['GET', 'POST'])
 def device_state():
     if request.method == 'POST':
-        print("Received POST request", file=os.sys.stderr)
+        # print("Received POST request", file=os.sys.stderr)
 
         params = request.get_json()
         r = requests.post(
             MESSAGE_ROUTER_API_URL+"/device_state",
             json = params
         )
-        print("Forwarding command Message Router", file=os.sys.stderr)
+        # print("Forwarding command Message Router", file=os.sys.stderr)
         return json.dumps(r.json()), r.status_code
 
     elif request.method == 'GET':
@@ -39,4 +39,3 @@ def device_state():
 
 
 app.run(host= HOST, port=PORT, debug=True)
-# app.run(host= HOST, port=PORT)

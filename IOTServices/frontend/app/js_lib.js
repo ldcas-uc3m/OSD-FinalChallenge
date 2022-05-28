@@ -8,19 +8,18 @@ var backend_api_port = "5001"
 var backend_url = "http://" + backend_api_address + ":" + backend_api_port + "/device_state"
 
 var get_current_sensor_data = function() {
+    // get room data from backend
     console.log("Requesting data from backend")
     $.getJSON(backend_url, function(data) {
         $.each(data, function(index, item) {
           $("#"+item.room).data(item.type, item.value)
-        //   console.log(item.room)
-        //   console.log(item.type)
-        //   console.log(item.value)
         });
         console.log(data)
     });
 }
 
 var draw_rooms = function(){
+    // use TDs to draw the room objects on the website
     $("#rooms").empty()
     var room_index = 1;
     for (var i = 0; i < 8; i++) {
@@ -49,11 +48,12 @@ $("#air_mode").change(function(){
         data: JSON.stringify({
             "room":$("#room_id").text(),
             "type":"air-mode",
-            "value":value,
+            "value":value
         }),
         contentType: 'application/json'
     });
     console.log("Posting command")
+    console.log(JSON.stringify({ "room":$("#room_id").text(), "type":"air-mode", "value":value}))
 })
 
 
@@ -65,9 +65,9 @@ $("#inner_light_mode").change(function(){
         data: JSON.stringify({
             "room":$("#room_id").text(),
             "type":"inner-light-mode",
-            "value":value,
+            "value":value
         }),
-        contentType: 'application/json',
+        contentType: 'application/json'
     });
 })
 
