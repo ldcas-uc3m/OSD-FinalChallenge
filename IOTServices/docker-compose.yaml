@@ -107,4 +107,4 @@ services:
       - message_router
       - data_ingestion_microservice
     links: 
-      - message_router:message_router
+      - message_router

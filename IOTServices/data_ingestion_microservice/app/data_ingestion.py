@@ -12,8 +12,7 @@ DB_NAME = os.getenv("DB_NAME")
 
 NUMBER_ROOMS = int(os.getenv("NUMBER_ROOMS"))
 
-DEVICES = ("temperature", "humidity", "presence", "air-level", "blinds", "inner-light-level", "exterior-light-level")
-DEVICES = ("temperature", "presence", "air-level")
+DEVICES = ("temperature", "humidity", "presence", "air-level", "air-mode", "blinds", "inner-light-level", "inner-light-mode", "exterior-light-level", "exterior-light-mode")
 
 
 def connect_database():
