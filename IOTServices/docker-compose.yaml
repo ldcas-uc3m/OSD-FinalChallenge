@@ -98,7 +98,7 @@ services:
       - PORT=5000  # self
       - DATA_INGESTION_API_ADDRESS=data_ingestion_microservice
       - DATA_INGESTION_API_PORT=5000
-      - MESSAGE_ROUTER_API_ADDRESS=message_router
+      - MESSAGE_ROUTER_API_ADDRESS=34.159.11.81  # idk why message_router does not work
       - MESSAGE_ROUTER_API_PORT=5002
       - PYTHONBUFFERED=1
     volumes:
