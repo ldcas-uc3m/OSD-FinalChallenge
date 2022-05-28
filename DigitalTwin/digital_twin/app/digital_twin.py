@@ -165,7 +165,7 @@ def on_connect_1883(client, userdata, flags, rc):
 
 
 def on_message_1833(client, userdata, msg):
-    global room_number, TELEMETRY_TOPIC, TEMPERATURE_TOPIC, HUMIDITY_TOPIC, BLINDS_TOPIC, IN_LIGHT_TOPIC, EX_LIGHT_TOPIC, PRESENCE_TOPIC, AIR_TOPIC, DISCONN_TOPIC
+    global room_number, TELEMETRY_TOPIC, TEMPERATURE_TOPIC, HUMIDITY_TOPIC, BLINDS_TOPIC, IN_LIGHT_TOPIC, EX_LIGHT_TOPIC, PRESENCE_TOPIC, AIR_TOPIC, DISCONN_TOPIC, COMMANDS_TOPIC
 
     print("Message received in MQTT-1 with topic", msg.topic, "and message", msg.payload.decode())
 
@@ -186,6 +186,11 @@ def on_message_1833(client, userdata, msg):
         EX_LIGHT_TOPIC = TELEMETRY_TOPIC + "/exterior-light"
         PRESENCE_TOPIC = TELEMETRY_TOPIC + "/presence"
         DISCONN_TOPIC = "hotel/rooms/" + room_number + "/disconn"
+        COMMANDS_TOPIC = "hotel/rooms/" + room_number + "/command/+"
+
+        # subscribe
+        client.subscribe()
+        print("Suscribed on MQTT-1 to", COMMANDS_TOPIC)
 
     elif "command" in topic:
         # forward command
@@ -346,46 +351,46 @@ def connect_mqtt_2():
     client.loop_start()
 
     # setup topics
-    AIR_MODE_COMAND_TOPIC = "hotel/rooms/"+ room_number +"command/air-mode"
-    AIR_LEVEL_COMAND_TOPIC = "hotel/rooms/"+ room_number +"command/air-level"
-    BLINDS_COMAND_TOPIC = "hotel/rooms/"+ room_number +"command/blinds"
-    IN_LIGHT_MODE_COMAND_TOPIC = "hotel/rooms/"+ room_number +"command/inner-light-mode"
-    IN_LIGHT_LEVEL_COMAND_TOPIC = "hotel/rooms/"+ room_number +"command/inner-light-level"
-    EX_LIGHT_MODE_COMAND_TOPIC = "hotel/rooms/"+ room_number +"command/exterior-light-mode"
-    EX_LIGHT_LEVEL_COMAND_TOPIC = "hotel/rooms/"+ room_number +"command/exterior-light-level"
+    AIR_MODE_COMMAND_TOPIC = "hotel/rooms/"+ room_number +"command/air-mode"
+    AIR_LEVEL_COMMAND_TOPIC = "hotel/rooms/"+ room_number +"command/air-level"
+    BLINDS_COMMAND_TOPIC = "hotel/rooms/"+ room_number +"command/blinds"
+    IN_LIGHT_MODE_COMMAND_TOPIC = "hotel/rooms/"+ room_number +"command/inner-light-mode"
+    IN_LIGHT_LEVEL_COMMAND_TOPIC = "hotel/rooms/"+ room_number +"command/inner-light-level"
+    EX_LIGHT_MODE_COMMAND_TOPIC = "hotel/rooms/"+ room_number +"command/exterior-light-mode"
+    EX_LIGHT_LEVEL_COMMAND_TOPIC = "hotel/rooms/"+ room_number +"command/exterior-light-level"
 
 
     # main loop
     while True:
         # check for commands in mqtt-1
         if air_mode_comm != curr_air_mode_comm:
-            client.publish(AIR_MODE_COMAND_TOPIC, payload = json.dumps({"mode": air_mode_comm}), qos = 0, retain = False)
+            client.publish(AIR_MODE_COMMAND_TOPIC, payload = json.dumps({"mode": air_mode_comm}), qos = 0, retain = False)
             curr_air_mode_comm = air_mode_comm
-            print("Published command in", AIR_MODE_COMAND_TOPIC, "with message", air_mode_comm)
+            print("Published command in", AIR_MODE_COMMAND_TOPIC, "with message", air_mode_comm)
         if air_level_comm != curr_air_level_comm:
-            client.publish(AIR_LEVEL_COMAND_TOPIC, payload = json.dumps({"level": air_level_comm}), qos = 0, retain = False)
+            client.publish(AIR_LEVEL_COMMAND_TOPIC, payload = json.dumps({"level": air_level_comm}), qos = 0, retain = False)
             curr_air_level_comm = air_level_comm
-            print("Published command in", AIR_LEVEL_COMAND_TOPIC, "with message", air_level_comm)
+            print("Published command in", AIR_LEVEL_COMMAND_TOPIC, "with message", air_level_comm)
         if blinds_comm != curr_blinds_comm:
-            client.publish(BLINDS_COMAND_TOPIC, payload = json.dumps({"level": blinds_comm}), qos = 0, retain = False)
+            client.publish(BLINDS_COMMAND_TOPIC, payload = json.dumps({"level": blinds_comm}), qos = 0, retain = False)
             curr_blinds_comm = blinds_comm
-            print("Published command in", BLINDS_COMAND_TOPIC, "with message", blinds_comm)
+            print("Published command in", BLINDS_COMMAND_TOPIC, "with message", blinds_comm)
         if in_light_mode_comm != curr_in_light_mode_comm:
-            client.publish(IN_LIGHT_MODE_COMAND_TOPIC, payload = json.dumps({"on": in_light_mode_comm}), qos = 0, retain = False)
+            client.publish(IN_LIGHT_MODE_COMMAND_TOPIC, payload = json.dumps({"on": in_light_mode_comm}), qos = 0, retain = False)
             curr_in_light_mode_comm = in_light_mode_comm
-            print("Published command in", IN_LIGHT_MODE_COMAND_TOPIC, "with message", in_light_mode_comm)
+            print("Published command in", IN_LIGHT_MODE_COMMAND_TOPIC, "with message", in_light_mode_comm)
         if in_light_level_comm != curr_in_light_level_comm:
-            client.publish(IN_LIGHT_LEVEL_COMAND_TOPIC, payload = json.dumps({"level": in_light_level_comm}), qos = 0, retain = False)
+            client.publish(IN_LIGHT_LEVEL_COMMAND_TOPIC, payload = json.dumps({"level": in_light_level_comm}), qos = 0, retain = False)
             curr_in_light_level_comm = in_light_level_comm
-            print("Published command in", IN_LIGHT_LEVEL_COMAND_TOPIC, "with message", in_light_level_comm)
+            print("Published command in", IN_LIGHT_LEVEL_COMMAND_TOPIC, "with message", in_light_level_comm)
         if ex_light_mode_comm != curr_ex_light_mode_comm:
-            client.publish(EX_LIGHT_MODE_COMAND_TOPIC, payload = json.dumps({"on": ex_light_mode_comm}), qos = 0, retain = False)
+            client.publish(EX_LIGHT_MODE_COMMAND_TOPIC, payload = json.dumps({"on": ex_light_mode_comm}), qos = 0, retain = False)
             curr_ex_light_mode_comm = ex_light_mode_comm
-            print("Published command in", EX_LIGHT_MODE_COMAND_TOPIC, "with message", ex_light_mode_comm)
+            print("Published command in", EX_LIGHT_MODE_COMMAND_TOPIC, "with message", ex_light_mode_comm)
         if ex_light_level_comm != curr_ex_light_level_comm:
-            client.publish(EX_LIGHT_LEVEL_COMAND_TOPIC, payload = json.dumps({"level": ex_light_level_comm}), qos = 0, retain = False)
+            client.publish(EX_LIGHT_LEVEL_COMMAND_TOPIC, payload = json.dumps({"level": ex_light_level_comm}), qos = 0, retain = False)
             curr_ex_light_level_comm = ex_light_level_comm
-            print("Published command in", EX_LIGHT_LEVEL_COMAND_TOPIC, "with message", ex_light_level_comm)
+            print("Published command in", EX_LIGHT_LEVEL_COMMAND_TOPIC, "with message", ex_light_level_comm)
 
 
         time.sleep(1)
