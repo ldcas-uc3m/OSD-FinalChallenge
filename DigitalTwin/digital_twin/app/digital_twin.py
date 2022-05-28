@@ -189,7 +189,7 @@ def on_message_1833(client, userdata, msg):
         COMMANDS_TOPIC = "hotel/rooms/" + room_number + "/command/+"
 
         # subscribe
-        client.subscribe()
+        client.subscribe(COMMANDS_TOPIC)
         print("Suscribed on MQTT-1 to", COMMANDS_TOPIC)
 
     elif "command" in topic:
