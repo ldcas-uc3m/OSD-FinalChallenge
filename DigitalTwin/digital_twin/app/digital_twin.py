@@ -314,6 +314,8 @@ def connect_mqtt_1():
             client.publish(BLINDS_TOPIC, payload = blinds, qos = 0, retain = False)
             curr_blinds = blinds
             published = True
+        
+        # TODO: (maybe?) send info about mode of sensors
 
         if published: print("Sent to MQTT-1 data from RPi")
         time.sleep(2)
@@ -372,7 +374,6 @@ def connect_mqtt_2():
     # main loop
     while True:
         # check for commands in mqtt-1
-        # FIXME: commands are not sent
         if air_mode_comm != curr_air_mode_comm:
             client.publish(AIR_MODE_COMMAND_TOPIC, payload = json.dumps({"mode": air_mode_comm}))
             curr_air_mode_comm = air_mode_comm
