@@ -105,7 +105,7 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, msg):
     global sensors
 
-    # print("Message received with topic", msg.topic, "and message", msg.payload.decode())
+    print("Message received with topic", msg.topic, "and message", msg.payload.decode())
 
     topic = (msg.topic).split("/")
     payload = json.loads(msg.payload.decode())

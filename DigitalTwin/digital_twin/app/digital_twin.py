@@ -190,7 +190,6 @@ def on_message_1833(client, userdata, msg):
 
     elif "command" in topic:
         # forward command
-        # FIXME: commands don't go through
         global air_mode_comm, air_level_comm, blinds_comm, in_light_mode_comm, in_light_level_comm, ex_light_mode_comm, ex_light_level_comm
 
         print("Received", topic[-1], "command, with payload", msg.payload.decode())
