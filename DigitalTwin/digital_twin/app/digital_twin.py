@@ -188,10 +188,6 @@ def on_message_1833(client, userdata, msg):
         DISCONN_TOPIC = "hotel/rooms/" + room_number + "/disconn"
         COMMANDS_TOPIC = "hotel/rooms/" + room_number + "/command/+"
 
-        # subscribe
-        client.subscribe(COMMANDS_TOPIC)
-        print("Suscribed on MQTT-1 to", COMMANDS_TOPIC)
-
     elif "command" in topic:
         # forward command
         # FIXME: commands don't go through
@@ -281,6 +277,10 @@ def connect_mqtt_1():
     while room_number == "":
         time.sleep(1)
     client.loop_stop()
+
+    # subscribe
+    client.subscribe(COMMANDS_TOPIC)
+    print("Suscribed on MQTT-1 to", COMMANDS_TOPIC)
 
     while room_number == "Room1":  # if this room receives from RPi
         # check if data has been received on mqtt-2
