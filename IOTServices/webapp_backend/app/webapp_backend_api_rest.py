@@ -32,5 +32,5 @@ DATA_INGESTION_API_URL = "http://"+os.getenv("DATA_INGESTION_API_ADDRESS")+":"+o
 MESSAGE_ROUTER_API_URL = "http://"+os.getenv("MESSAGE_ROUTER_API_ADDRESS")+":"+os.getenv("MESSAGE_ROUTER_API_PORT")
 HOST = os.getenv('HOST')
 PORT = os.getenv('PORT')
-# app.run(host= HOST, port=PORT, debug=True)
-app.run(host= HOST, port=PORT)
+app.run(host= HOST, port=PORT, debug=True)
+# app.run(host= HOST, port=PORT)
