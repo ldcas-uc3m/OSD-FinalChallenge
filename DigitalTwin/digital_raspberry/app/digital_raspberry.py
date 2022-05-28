@@ -165,6 +165,6 @@ if __name__ == "__main__":
         client.publish(PRESENCE_TOPIC, payload = json_presence, qos = 0, retain = False)
         client.publish(IN_LIGHT_TOPIC, payload = json_inner_light, qos = 0, retain = False)
         client.publish(EX_LIGHT_TOPIC, payload = json_exterior_light, qos = 0, retain = False)
-        print("Sent to sensor data to topic", TELEMETRY_TOPIC)
+        print("Sent sensor data to topic", TELEMETRY_TOPIC)
 
         time.sleep(10)

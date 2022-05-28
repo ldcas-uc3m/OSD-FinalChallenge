@@ -127,14 +127,14 @@ def send_command(params):
     type_dev = params["type"]
     value = params["value"]
     room = params["room"]
-    topic = "hotel/rooms/" + room + "/comand/" + type_dev
+    topic = "hotel/rooms/" + room + "/command/" + type_dev
     
     if type_dev == "air-mode":
-        client.publish(topic, payload = json.dumps({"mode": value}), qos=0, retain=True)
+        client.publish(topic, payload = json.dumps({"mode": value}))
     elif type_dev in ("inner-light-mode", "exterior-light-mode"):
-        client.publish(topic, payload = json.dumps({"on": value}), qos=0, retain=True)
-    elif type_dev in ("air-level", "blinds", "inner-light-light", "exterior-light-level"):
-        client.publish(topic, payload = json.dumps({"level": value}), qos=0, retain=True)
+        client.publish(topic, payload = json.dumps({"on": value}))
+    elif type_dev in ("air-level", "blinds", "inner-light-level", "exterior-light-level"):
+        client.publish(topic, payload = json.dumps({"level": value}))
     else:
         return {"response":"Incorrect type param"}, 401
 
@@ -164,8 +164,8 @@ if __name__ == "__main__":
     client.on_message = on_message
     client.connect(MQTT_HOST, MQTT_PORT, 60)
 
-    t1 = threading.Thread(target =mqtt_listener)
-    t1.setDaemon(True)
+    t1 = threading.Thread(target=mqtt_listener)
+    t1.daemon = True
     t1.start()
     
     # start api

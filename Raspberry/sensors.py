@@ -427,7 +427,7 @@ def connect_mqtt():
     client.on_connect = on_connect
     client.on_message = on_message
     client.on_disconnect = on_disconnect
-    client.will_set(DISCONN_TOPIC)  # setup last will
+    client.will_set(DISCONN_TOPIC, retain=True)  # setup last will
     client.connect(MQTT_SERVER, MQTT_PORT, 60)
 
     client.loop_start()  # listen for commands
