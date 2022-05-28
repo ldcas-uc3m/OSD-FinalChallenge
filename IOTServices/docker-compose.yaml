@@ -104,4 +104,7 @@ services:
     volumes:
       - ./webapp_backend/app:/etc/usr/src/app
     depends_on:
+      - message_router
       - data_ingestion_microservice
+    links: 
+      - message_router:message_router

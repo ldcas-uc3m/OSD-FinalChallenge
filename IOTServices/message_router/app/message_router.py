@@ -118,7 +118,7 @@ def send_command(params):
     else:
         return {"response":"Incorrect type param"}, 401
 
-    print("command message sent through" + topic)
+    print("Command message sent through", topic)
     return {"response":"Message successfully sent"}, 200
 
 
