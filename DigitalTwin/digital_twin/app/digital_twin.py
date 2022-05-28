@@ -276,7 +276,6 @@ def connect_mqtt_1():
     client.loop_start()
     while room_number == "":
         time.sleep(1)
-    client.loop_stop()
 
     # subscribe
     client.subscribe(COMMANDS_TOPIC)
@@ -342,6 +341,8 @@ def connect_mqtt_1():
         print("Sent sensor data to topic", TELEMETRY_TOPIC)
 
         time.sleep(10)
+
+    client.loop_stop()
 
 
 def connect_mqtt_2():
