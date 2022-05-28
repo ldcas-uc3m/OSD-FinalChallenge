@@ -44,7 +44,7 @@ $("#air_mode").change(function(){
         type: "POST",
         url: "http://" + backend_api_address + ":5001/device_state",
         data: JSON.stringify({
-            "room":$("#id").text(),
+            "room":$("#room_id").text(),
             "type":"air-mode",
             "value":value,
         }),
@@ -72,7 +72,7 @@ $("#inner_light_mode").change(function(){
 $("#rooms").on("click", "td", function() {
     // unpackage data from backend
     console.log($(this).data())
-    $("#room_id").text($( this ).attr("room") || "");
+    $("#room_id").text($( this ).attr("id") || "");
     $("#temperature_value").text($( this ).data("temperature") || "0");
     $("#presence_value").text($( this ).data("presence") || "0");
     $("#air_conditioner_value").text($( this ).data("air-level") || "0");
