@@ -77,9 +77,22 @@ def on_message(client, userdata, msg):
         if payload["active"]:  # we only save active sensors
 
             # get value
-            if topic[-1] in ("air", "inner-light", "exterior-light"):  # special case
+            if topic[-1] == "air":  # special case
                 level = payload["value"]
                 mode = payload["mode"]
+                # post
+                requests.post(
+                    DATA_INGESTION_API_URL + "/device_state",
+                    json={"room":room_name, "type": topic[-1] + "-level", "value":level}
+                )
+                requests.post(
+                    DATA_INGESTION_API_URL+"/device_state",
+                    json={"room":room_name, "type": topic[-1] + "-mode", "value":mode}
+                )
+
+            elif topic[-1] in ("inner-light", "exterior-light"):
+                level = payload["value"]
+                mode = payload["on"]
                 # post
                 requests.post(
                     DATA_INGESTION_API_URL + "/device_state",
