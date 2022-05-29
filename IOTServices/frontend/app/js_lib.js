@@ -71,6 +71,62 @@ $("#inner_light_mode").change(function(){
     });
 })
 
+$("#inner_light_level").change(function(){
+    var value = $(this).val()
+    $.ajax({
+        type: "POST",
+        url: backend_url,
+        data: JSON.stringify({
+            "room":$("#room_id").text(),
+            "type":"inner-light-mode",
+            "value":value
+        }),
+        contentType: 'application/json'
+    });
+})
+
+$("#exterior_light_mode").change(function(){
+    var value = $(this).val()
+    $.ajax({
+        type: "POST",
+        url: backend_url,
+        data: JSON.stringify({
+            "room":$("#room_id").text(),
+            "type":"exterior_light_mode",
+            "value":value
+        }),
+        contentType: 'application/json'
+    });
+})
+
+$("#exterior_light_level").change(function(){
+    var value = $(this).val()
+    $.ajax({
+        type: "POST",
+        url: backend_url,
+        data: JSON.stringify({
+            "room":$("#room_id").text(),
+            "type":"exterior_light_level",
+            "value":value
+        }),
+        contentType: 'application/json'
+    });
+})
+
+$("#blinds").change(function(){
+    var value = $(this).val()
+    $.ajax({
+        type: "POST",
+        url: backend_url,
+        data: JSON.stringify({
+            "room":$("#room_id").text(),
+            "type":"blinds",
+            "value":value
+        }),
+        contentType: 'application/json'
+    });
+})
+
 $("#rooms").on("click", "td", function() {
     // unpackage data from backend
     $("#room_id").text($( this ).attr("id") || "");
@@ -79,6 +135,11 @@ $("#rooms").on("click", "td", function() {
     $("#presence_value").text($( this ).data("presence") || "0");
     $("#air_value").text($( this ).data("air-level") || "0");
     $("#air_mode").val($( this ).data("air-mode"));
+    $("#inner_light_mode").val($( this ).data("inner_light_mode"));
+    $("#inner_light_level").val($( this ).data("inner_light_level"));
+    $("#exterior_light_mode").val($( this ).data("exterior_light_mode"));
+    $("#exterior_light_level").val($( this ).data("exterior_light_level"));
+    $("#blinds").val($( this ).data("blinds"));
 });
 
 draw_rooms()
