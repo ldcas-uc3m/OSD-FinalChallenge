@@ -60,7 +60,7 @@ Throught the frontend, the user will be able to get the state information from a
 ### Architecture
 The diagram for the architecture of the implementation is the following:  
 
-![architecture diagram](img/diagram.png)
+![architecture diagram](img/architecture_diagram.svg)
   
 The architecture consists of the Raspberry Pies, two MQTT routers (MQTT-1, the top one, and MQTT-2, the bottom one), Digital Twins, a Message Router, the Data Ingestion ReST API, a MariaDB DBMS, and the website Frontend and Webapp Backend ReST API.
 
