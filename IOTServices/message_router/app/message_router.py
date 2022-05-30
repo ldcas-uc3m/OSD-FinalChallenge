@@ -18,7 +18,6 @@ DATA_INGESTION_API_PORT = os.getenv("DATA_INGESTION_API_PORT")
 
 API_HOST = os.getenv("HOST")
 API_PORT = os.getenv("PORT")
-API_URL = "http://" + API_HOST + ":" + API_PORT
 
 DATA_INGESTION_API_URL = "http://" + DATA_INGESTION_API_ADDRESS + ":" + DATA_INGESTION_API_PORT
 
@@ -29,9 +28,6 @@ ALL_TOPICS = "hotel/rooms/+/telemetry/+"  # the + is kinda like a *, a wildcard.
 
 # GLOBAL VARIABLES
 index_room = 1
-saved_rooms = {}
-
-COMMANDS = ("air-mode", "air-level")
 
 app = Flask(__name__)
 
@@ -49,7 +45,7 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, msg):
     # decode data
 
-    global current_temperature, current_air, current_blind, index_room
+    global index_room
     print("Message received in", msg.topic, "with message", msg.payload.decode("utf-8"))
     topic = (msg.topic).split("/")
     

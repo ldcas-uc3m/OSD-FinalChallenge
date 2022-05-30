@@ -395,7 +395,7 @@ def connect_mqtt_2():
 
 
     # main loop
-    while True:
+    while is_connected:
         # check for commands in mqtt-1
         if air_mode_comm != curr_air_mode_comm:
             client.publish(AIR_MODE_COMMAND_TOPIC, payload = json.dumps({"mode": air_mode_comm}))

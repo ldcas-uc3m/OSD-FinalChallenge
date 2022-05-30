@@ -143,4 +143,4 @@ $("#rooms").on("click", "td", function() {
 });
 
 draw_rooms()
-setInterval(get_current_sensor_data,5000)
+setInterval(get_current_sensor_data, 3000)

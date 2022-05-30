@@ -1,6 +1,6 @@
 # Operating Systems Design: Final Challenge
 By Luis Daniel Casais Mezquida, Iván Darío Cersósimo and Hashim Mahmood  
-Operating Systems Design 21/22
+Operating Systems Design 21/22  
 Bachelor's Degree in Computer Science and Engineering, grp. 89  
 Universidad Carlos III de Madrid
 
@@ -200,10 +200,18 @@ Each client is subscribed to different topics, as such:
     - `digital_twin`: `hotel/rooms/<room_id>/telemetry/+`, `hotel/rooms/<room>/disconn`
 
 #### `digital_twin`
-<!-- TODO: digital twin -->
+Digital Twins have two modes:
+- The first one, its intended use, listens for the data sent from the assigned Raspberry Pi on MQTT-2 and relays it to the MQTT-1, and also handles the disconnection of the RPi through the disconnect topic.  
+It saves the current data, and only publishes new data if it has changed.  
+Finally, it relays the commands to the RPi.
+- The second mode publishes random data as if it were a Digital Raspberry.
+
+The Digital Twin first sents its docker container id to the Rooms Management using the config topic, in order to get an assigned room id. If that id corresponds with the one of an active RPi (controlled by the parameters, see [Scaling](#scaling)), it goes into the first mode. In any other case, it goes to the second mode.
 
 #### `message_router`
-<!-- TODO: message router -->
+The message router is in charge of listening on MQTT-1 for telemetry messages, and sending them through a `POST` request to the Data Ingestion microservice.  
+It also implements a small ReST API using Flask, that through the `/device_state` route waits for `POST` requests in order to send the commands to MQTT-1.  
+It's also in charge of translating the strings used for the modes of some sensors ("cold", "on", etc.) into numbers so they are prepared to be sent to the `device_state` DB, as that only accepts numbers for the values of the sensors. Plus, translating the command's numbers back to the strings.  
 
 #### `mariaDB`
 By setting up enviroment variables for the mariaDB image on the docker-compose, we automatically create a new MySQL database, `dso_db`, and setup credentials.  
@@ -244,16 +252,21 @@ This service is divided into two scripts: `data_ingestion_api_rest` serves as an
 The API launches a Flask server in order to manage the requests, with two routes:
 - `/device_state`: Receives `GET` requests from the Webapp backend, and `POST` requests from the Message Router.  
 It's in charge of inserting and extracting data from the `device_state` table.  
-The structure of the package for the `POST` request is 
+The structure of the package for the `POST` request is: `{ "room": <room>, "type": <device>, "value": <value> }`
+- `/device_log`: Receives `POST` requests from the Rooms Management in order to log the connection/disconnection of devices.  
+The structure of the package for the request is: `{ "room": <room>, "device": <device>, "active": <bool> }`
 
-<!-- TODO: finish data ingestion -->
+Each request has an associated function in order to insert or receive data from the mariaDB.  
+Inserts are quite straightforward, just putting the values received in the request plus the current timestamp.  
+To get the sensor data for the frontend, we do one query per room, per device, in order to get the latest data. If nothing is found, we send nothing.
 
 #### `rooms_management`
 
 <!-- TODO: rooms_management -->
 
 #### `frontend`
-The website generates the rooms layout using TDs, and then launches `GET` requests, each 3 seconds, to the backend in order to receive the data of the rooms.  
+It's built using Apache, and consists of a simple HTML + CSS + JS.  
+The website generates the rooms layout using TDs through JS, and then launches `GET` requests, each 3 seconds, to the backend in order to receive the data of the rooms.  
 It expects that data to be of the format:  
 ```
 [
@@ -269,7 +282,7 @@ It expects that data to be of the format:
 In order to send commands to the RPi, the frontend sends JSONs to the backend, through a `POST` request.  
 The formats, depending on the action, are the following:
 - `#air_mode`: Change the air conditioner mode (cold, hot, off)  
-Pakage structure: `{ "room": <roomID>, "type": "air-mode", "value": <"cold" | "hot" | "off"> }`
+Pakage structure: `{ "room": <roomID>, "type": "air-mode", "value": <0 (off) || 1 (cold) || 2 (hot)> }`
 - `#air_level`: Change the air conditioner intensity  
 Pakage structure: `{ "room": <roomID>, "type": "air-level", "value": <int from 0 to 100 (%)> }`
 - `#blinds`: Change the value of the blinds  

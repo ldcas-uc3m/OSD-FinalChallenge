@@ -47,7 +47,7 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, msg):
     # decode data
 
-    global current_temperature, current_air, current_blind, index_room
+    global index_room
     print("Message received in", msg.topic, "with message", msg.payload.decode("utf-8"))
     topic = (msg.topic).split("/")
     
