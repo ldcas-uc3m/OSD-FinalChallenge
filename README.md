@@ -200,10 +200,10 @@ Each client is subscribed to different topics, as such:
     - `digital_twin`: `hotel/rooms/<room_id>/telemetry/+`, `hotel/rooms/<room>/disconn`
 
 #### `digital_twin`
-
+<!-- TODO: digital twin -->
 
 #### `message_router`
-
+<!-- TODO: message router -->
 
 #### `mariaDB`
 By setting up enviroment variables for the mariaDB image on the docker-compose, we automatically create a new MySQL database, `dso_db`, and setup credentials.  
@@ -220,7 +220,7 @@ This script creates two tables:
 | value     | TYNYINT     |     |       |                |
 | date      | DATETIME    |     |       |                |
 
-Note: in the case of `type` = `air-mode`, 0 = off, 1 = cold and 2 = hot. In the case of `type` = `inner-light-mode` or `exterior-light-mode`, 0 = off and 1 = on.
+Note: in the case of `type` = `air-mode`, `0` = off, `1` = cold and `2` = hot. In the case of `type` = `inner-light-mode` or `exterior-light-mode`, `0` = off and `1` = on.
 
 - `device_log`: Registers the connections and disconnections of the sensors for each room, with its timestamp.
 
@@ -232,7 +232,7 @@ Note: in the case of `type` = `air-mode`, 0 = off, 1 = cold and 2 = hot. In the 
 | state     | BOOLEAN     |     |       |                |
 | date      | DATETIME    |     |       |                |
 
-Note: in `state`, 1 = connect and 0 = disconnect.
+Note: in `state`, `1` = connect and `0` = disconnect.
 
 
 #### `adminer`
@@ -240,6 +240,11 @@ The Adminer image provides a web interface for the mariaDB, and it uses port `80
 
 #### `data_ingestion_microservice`
 This service is divided into two scripts: `data_ingestion_api_rest` serves as an ReST API to receive requests, and `data_ingestion` provides the functions in order to operate with the mariaDB.  
+  
+The API launches a Flask server in order to manage the requests, with two routes:
+- `/device_state`: Receives `GET` requests from the Webapp backend, and `POST` requests from the Message Router.  
+It's in charge of inserting and extracting data from the `device_state` table.  
+The structure of the package for the `POST` request is 
 
 <!-- TODO: finish data ingestion -->
 
@@ -297,25 +302,24 @@ sudo apt install pip -y
 4. Make sure port `1883` (MQTT-1) and `1884` (MQTT-2) are open on all machines, and ports `5000` (Data Ingestion ReST API), `5001` (Webapp Backend ReST API), `5002` (Message Router ReST API), `3306` (mariaDB), `8080` (adminer) and `80` (http) are open on the IOTServices machine.
 5. Setup the circuit on the Raspberry Pi, as such:  
 
-![Raspberry Pi circuit diagram](img/RPi_diagram.png)  
-<!-- TODO: Update RPi diagram -->
+![Raspberry Pi circuit diagram](img/RPi_diagram.svg)  
 
 The pins are:
 
-| PIN     | BCM CODE |
-| ------- | -------- |
-| MOTOR1A | GPIO24   |
-| MOTOR1B | GPIO23   |
-| MOTOR1E | GPIO25   |
-| DHT     | GPIO04   |
-| RED     | GPIO17   |
-| BLUE    | GPIO18   |
-| GREEN   | GPIO27   |
-| WHITE   | GPIO26   |
-| YELLOW  | GPIO06   |
-| BUTTON  | GPIO16   |
-| DHT     | GPIO04   |
-| SERVO   | GPIO14   |
+| PIN        | BCM CODE |
+| -------    | -------- |
+| MOTOR1A    | GPIO24   |
+| MOTOR1B    | GPIO23   |
+| MOTOR1E    | GPIO25   |
+| DHT        | GPIO04   |
+| RED LED    | GPIO17   |
+| BLUE LED   | GPIO18   |
+| GREEN LED  | GPIO27   |
+| WHITE LED  | GPIO26   |
+| YELLOW LED | GPIO06   |
+| BUTTON     | GPIO16   |
+| DHT11      | GPIO04   |
+| SERVO      | GPIO14   |
 
 6. On the IOTServices machine, run:
 ```bash
@@ -363,11 +367,11 @@ Adminer is a web interface for MariaDB.
 To access it, go to `<IP of the IOTServices machine>:8080`, and login with:
 - System: `MySQL`
 - Server: `mariaDB`
-- Username: `<MYSQL_USER>`
-- Password: `<MYSQL_PASSWORD>`
-- Database: `<MYSQL_DATABASE>`
+- Username: `dso_db_user`
+- Password: `dso_db_password`
+- Database: `dso_db`
 
-Note that the variables (in <>) are the enviroment variables for mariaDB found on `IOTServices/docker-compose.yaml`.
+Note that the credentials are the enviroment variables for mariaDB found on `IOTServices/docker-compose.yaml`.
 
 ### Frontend
 To access the frontend, go to `<IP of the IOTServices machine>`.
