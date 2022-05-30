@@ -404,16 +404,16 @@ def on_message(client, userdata, msg):
         sensors["blinds"]["level"] = payload["level"]
     elif topic[-1] == "inner-light-mode":
         print("inner-light-mode command received:", payload)
-        sensors["inner_light_conditioner"]["on"] = payload["on"]
+        sensors["inner_light"]["on"] = payload["on"]
     elif topic[-1] == "inner-light-level":
         print("inner-light-level command received:", payload)
-        sensors["inner_light_conditioner"]["level"] = payload["level"]
+        sensors["inner_light"]["level"] = payload["level"]
     elif topic[-1] == "exterior-light-mode":
         print("exterior-light-mode command received:", payload)
-        sensors["exterior_light_conditioner"]["on"] = payload["on"]
+        sensors["exterior_light"]["on"] = payload["on"]
     elif topic[-1] == "exterior-light-level":
         print("exterior-light-level command received:", payload)
-        sensors["exterior_light_conditioner"]["level"] = payload["level"]
+        sensors["exterior_light"]["level"] = payload["level"]
         
 
 
@@ -432,15 +432,23 @@ def on_disconnect(client, userdata, rc):
 
 def send_data(client):
     # sends the sensor data
-    client.publish(TEMPERATURE_TOPIC, payload=sensors["temperature"]["temperature"], qos=0, retain=False)
-    client.publish(HUMIDITY_TOPIC, payload=sensors["humidity"]["humidity"], qos=0, retain=False)
-    client.publish(IN_LIGHT_TOPIC, payload=sensors["inner_light"]["level"], qos=0, retain=False)
-    client.publish(EX_LIGHT_TOPIC, payload=sensors["exterior_light"]["level"], qos=0, retain=False)
-    client.publish(AIR_TOPIC, payload=dc, qos=0, retain=False)
-    client.publish(PRESENCE_TOPIC, payload=sensors["presence"]["is_detected"], qos=0, retain=False)
-    client.publish(BLINDS_TOPIC, payload=sensors["blinds"]["angle"], qos=0, retain=False)
-    print("Sent to sensor data to topic", TELEMETRY_TOPIC)
-    # TODO: send data function. change payloads to include ["active"] & JSON format
+    json_temperature = json.dumps({"active": sensors["temperature"]["active"], "value": sensors["temperature"]["temperature"] })
+    json_humidity = json.dumps({ "active": sensors["humidity"]["active"], "value": sensors["humidity"]["humidity"] })
+    json_blinds = json.dumps({ "active": sensors["blinds"]["active"], "value": sensors["blinds"]["angle"] })
+    json_presence = json.dumps({ "active": sensors["presence"]["active"], "value": sensors["presence"]["is_detected"] })
+    json_air = json.dumps({ "active": sensors["air_conditioner"]["active"], "mode": sensors["air_conditioner"]["mode"], "value": sensors["air_conditioner"]["level"] })
+    json_inner_light = json.dumps({ "active": sensors["inner_light"]["active"], "on": sensors["inner_light"]["on"], "value": sensors["inner_light"]["level"] })
+    json_exterior_light = json.dumps({ "active": sensors["exterior_light"]["active"], "on": sensors["exterior_light"]["on"], "value": sensors["exterior_light"]["level"] })
+    
+    # send data
+    client.publish(TEMPERATURE_TOPIC, payload = json_temperature, qos = 0, retain = False)
+    client.publish(HUMIDITY_TOPIC, payload = json_humidity, qos = 0, retain = False)
+    client.publish(AIR_TOPIC, payload = json_air, qos = 0, retain = False)
+    client.publish(BLINDS_TOPIC, payload = json_blinds, qos = 0, retain = False)
+    client.publish(PRESENCE_TOPIC, payload = json_presence, qos = 0, retain = False)
+    client.publish(IN_LIGHT_TOPIC, payload = json_inner_light, qos = 0, retain = False)
+    client.publish(EX_LIGHT_TOPIC, payload = json_exterior_light, qos = 0, retain = False)
+    print("Sent sensor data to topic", TELEMETRY_TOPIC)
 
 
 def connect_mqtt():
