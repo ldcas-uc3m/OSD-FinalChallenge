@@ -269,6 +269,8 @@ def on_message_1884(client, userdata, msg):
         ex_light = payload
     elif topic[-1] == "presence":
         presence = payload
+    elif topic[-1] == "blinds":
+        blinds = payload
     
     elif topic[-1] == "disconn":
         # RPi has disconnected, set all devices to false

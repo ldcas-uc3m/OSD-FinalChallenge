@@ -15,7 +15,7 @@ TELEMETRY_TOPIC = "hotel/rooms/" + ROOM_ID + "/telemetry"
 DISCONN_TOPIC = "hotel/rooms/" + ROOM_ID + "/disconn"
 TEMPERATURE_TOPIC = TELEMETRY_TOPIC + "/temperature"
 HUMIDITY_TOPIC = TELEMETRY_TOPIC + "/humidity"
-AIR_TOPIC = TELEMETRY_TOPIC + "/air-conditioner"
+AIR_TOPIC = TELEMETRY_TOPIC + "/air"
 IN_LIGHT_TOPIC = TELEMETRY_TOPIC + "/inner-light"
 EX_LIGHT_TOPIC = TELEMETRY_TOPIC + "/exterior-light"
 PRESENCE_TOPIC = TELEMETRY_TOPIC + "/presence"
@@ -163,6 +163,7 @@ if __name__ == "__main__":
         # send data
         client.publish(TEMPERATURE_TOPIC, payload = json_temperature, qos = 0, retain = False)
         client.publish(HUMIDITY_TOPIC, payload = json_humidity, qos = 0, retain = False)
+        client.publish(AIR_TOPIC, payload = json_air, qos = 0, retain = False)
         client.publish(BLINDS_TOPIC, payload = json_blinds, qos = 0, retain = False)
         client.publish(PRESENCE_TOPIC, payload = json_presence, qos = 0, retain = False)
         client.publish(IN_LIGHT_TOPIC, payload = json_inner_light, qos = 0, retain = False)
