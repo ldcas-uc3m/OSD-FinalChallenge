@@ -77,7 +77,7 @@ def on_message(client, userdata, msg):
 
             print("Sent", data, "to Data Ingestion API")
 
-        elif not isActive:  # registered device disconnected
+        elif device in saved_devices and not isActive:  # registered device disconnected
             saved_devices.remove(device)
 
             data = {"room": room_name, "device": topic[-1], "active": isActive}

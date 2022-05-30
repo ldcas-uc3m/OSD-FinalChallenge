@@ -38,7 +38,7 @@ services:
       - data_ingestion_microservice
 
   mariaDB:
-    image: "mariadb:latest"  # no Dockerfile needed, as we don't need to run config
+    image: "mariadb:10.7"  # no Dockerfile needed, as we don't need to run config
     ports:
       - 3306:3306
     environment:

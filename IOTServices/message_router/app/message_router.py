@@ -86,9 +86,9 @@ def on_message(client, userdata, msg):
             elif topic[-1] in ("inner-light", "exterior-light"):
                 level = payload["value"]
                 # translate modes into numbers (0 = off, 1 = on)
-                if payload["mode"] == "off":
+                if payload["on"]:
                     mode = 0
-                elif payload["mode"] == "on":
+                elif payload["on"]:
                     mode = 1
                 else:
                     print("Incorrect parameter")
@@ -135,9 +135,9 @@ def send_command(params):
             value = "hot"
     elif topic[-1] in ("inner-light-mode", "exterior_light_mode"):
         if params["value"] == 0:
-            value = "off"
+            value = False
         elif params["value"] == 1:
-            value = "on"
+            value = True
     else:
         value = params["value"]
 
