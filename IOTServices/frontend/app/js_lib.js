@@ -51,12 +51,12 @@ $("#air_mode").change(function(){
         data: JSON.stringify({
             "room":$("#room_id").text(),
             "type":"air-mode",
-            "value": parseInt(value)
+            "value": value
         }),
         contentType: 'application/json'
     });
     console.log("Posting command")
-    console.log(JSON.stringify({ "room":$("#room_id").text(), "type":"air-mode", "value":vparseInt(value)}))
+    console.log(JSON.stringify({ "room":$("#room_id").text(), "type":"air-mode", "value":value}))
 })
 
 
@@ -68,29 +68,12 @@ $("#inner_light_mode").change(function(){
         data: JSON.stringify({
             "room":$("#room_id").text(),
             "type":"inner-light-mode",
-            "value": parseInt(value)
+            "value": value
         }),
         contentType: 'application/json'
     });
     console.log("Posting command")
-    console.log(JSON.stringify({ "room":$("#room_id").text(), "type":"air-mode", "value":vparseInt(value)}))
-})
-
-
-$("#inner_light_level").change(function(){
-    var value = $(this).val()
-    $.ajax({
-        type: "POST",
-        url: backend_url,
-        data: JSON.stringify({
-            "room":$("#room_id").text(),
-            "type":"inner-light-mode",
-            "value": parseInt(value)
-        }),
-        contentType: 'application/json'
-    });
-    console.log("Posting command")
-    console.log(JSON.stringify({ "room":$("#room_id").text(), "type":"air-mode", "value":vparseInt(value)}))
+    console.log(JSON.stringify({ "room":$("#room_id").text(), "type":"inner-light-mode", "value":value}))
 })
 
 
@@ -101,48 +84,69 @@ $("#exterior_light_mode").change(function(){
         url: backend_url,
         data: JSON.stringify({
             "room":$("#room_id").text(),
-            "type":"exterior_light_mode",
-            "value": parseInt(value)
+            "type":"exterior-light-mode",
+            "value": value
         }),
         contentType: 'application/json'
     });
     console.log("Posting command")
-    console.log(JSON.stringify({ "room":$("#room_id").text(), "type":"air-mode", "value":vparseInt(value)}))
+    console.log(JSON.stringify({ "room":$("#room_id").text(), "type":"exterior-light-mode", "value":value}))
 })
 
-
-$("#exterior_light_level").change(function(){
-    var value = $(this).val()
+function sendInnerLight(){
+    console.log("Posting command")
     $.ajax({
         type: "POST",
         url: backend_url,
         data: JSON.stringify({
             "room":$("#room_id").text(),
-            "type":"exterior_light_level",
-            "value": parseInt(value)
+            "type":"inner-light-level",
+            "value": $("#inner_light_level").val()
         }),
         contentType: 'application/json'
     });
+    console.log(JSON.stringify({ "room":$("#room_id").text(), "type":"inner-light-level", "value":$("#inner_light_level").val()}))
+    
+}
+
+function sendExteriorLight(){
     console.log("Posting command")
-    console.log(JSON.stringify({ "room":$("#room_id").text(), "type":"air-mode", "value":vparseInt(value)}))
-})
+    $.ajax({
+        type: "POST",
+        url: backend_url,
+        data: JSON.stringify({
+            "room":$("#room_id").text(),
+            "type":"exterior-light-level",
+            "value": $("#exterior_light_level").val()
+        }),
+        contentType: 'application/json'
+    });
+    console.log(JSON.stringify({ "room":$("#room_id").text(), "type":"exterior-light-level", "value":$("#exterior_light_level").val()}))
+    
+}
 
-
-$("#blinds").change(function(){
-    var value = $(this).val()
+function sendBlinds(){
+    console.log("Posting command")
     $.ajax({
         type: "POST",
         url: backend_url,
         data: JSON.stringify({
             "room":$("#room_id").text(),
             "type":"blinds",
-            "value": parseInt(value)
+            "value": $("#blinds").val()
         }),
         contentType: 'application/json'
     });
-    console.log("Posting command")
-    console.log(JSON.stringify({ "room":$("#room_id").text(), "type":"air-mode", "value":vparseInt(value)}))
-})
+    console.log(JSON.stringify({ "room":$("#room_id").text(), "type":"blinds", "value":$("#blinds").val()}))
+    
+}
+
+
+function sendAll(){
+    sendInnerLight()
+    sendExteriorLight()
+    sendBlinds()
+}
 
 
 $("#rooms").on("click", "td", function() {
@@ -153,10 +157,10 @@ $("#rooms").on("click", "td", function() {
     $("#presence_value").text($( this ).data("presence") || "0");
     $("#air_value").text($( this ).data("air-level") || "0");
     $("#air_mode").val($( this ).data("air-mode"));
-    $("#inner_light_mode").val($( this ).data("inner_light_mode"));
-    $("#inner_light_level").val($( this ).data("inner_light_level"));
-    $("#exterior_light_mode").val($( this ).data("exterior_light_mode"));
-    $("#exterior_light_level").val($( this ).data("exterior_light_level"));
+    $("#inner_light_mode").val($( this ).data("inner-light-mode"));
+    $("#inner_light_level").val($( this ).data("inner-light-level"));
+    $("#exterior_light_mode").val($( this ).data("exterior-light-mode"));
+    $("#exterior_light_level").val($( this ).data("exterior-light-level"));
     $("#blinds").val($( this ).data("blinds"));
 });
 

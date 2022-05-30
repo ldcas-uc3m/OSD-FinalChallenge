@@ -125,7 +125,7 @@ def send_command(params):
     room = params["room"]
     type_dev = params["type"]
 
-    # translate numbers to modes
+    # parse values
     if type_dev == "air-mode":
         if params["value"] == "0":
             value = "off"
@@ -133,13 +133,27 @@ def send_command(params):
             value = "cold"
         elif params["value"] == "2":
             value = "hot"
-    elif type_dev in ("inner-light-mode", "exterior_light_mode"):
+    elif type_dev in ("inner-light-mode", "exterior-light-mode"):
         if params["value"] == "0":
             value = False
         elif params["value"] == "1":
             value = True
+    elif type_dev in ("inner-light-level", "exterior-light-level"):
+        if params["value"].isnumeric():
+            value = int(params["value"])
+            if value < 0 or value > 100:
+                return {"response":"Incorrect type param"}, 401
+        else:
+            return {"response":"Incorrect type param"}, 401
+    elif type_dev == "blinds":
+        if params["value"].isnumeric():
+            value = int(params["value"])
+            if value < 0 or value > 180:
+                return {"response":"Incorrect type param"}, 401
+        else:
+            return {"response":"Incorrect type param"}, 401
     else:
-        value = params["value"]
+        return {"response":"Incorrect type param"}, 401
 
 
     topic = "hotel/rooms/" + room + "/command/" + type_dev

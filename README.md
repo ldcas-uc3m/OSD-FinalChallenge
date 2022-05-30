@@ -272,19 +272,19 @@ It expects that data to be of the format: `[ { "room": <roomId>, "type": <sensor
 In order to send commands to the RPi, the frontend sends JSONs to the backend, through a `POST` request.  
 The formats, depending on the action, are the following:
 - `#air_mode`: Change the air conditioner mode (cold, hot, off)  
-Pakage structure: `{ "room": <roomID>, "type": "air-mode", "value": <0 (off) || 1 (cold) || 2 (hot)> }`
+Pakage structure: `{ "room": <roomID>, "type": "air-mode", "value": <"0" (off) || "1" (cold) || "2" (hot)> }`
 - `#air_level`: Change the air conditioner intensity  
-Pakage structure: `{ "room": <roomID>, "type": "air-level", "value": <int from 0 to 100 (%)> }`
+Pakage structure: `{ "room": <roomID>, "type": "air-level", "value": <"0" to "100" (%)> }`
 - `#blinds`: Change the value of the blinds  
-Pakage structure: `{ "room": <roomID>, "type": "blinds", "value": <int from 0 to 180 (º)> }`
+Pakage structure: `{ "room": <roomID>, "type": "blinds", "value": <"0" to "180" (º)> }`
 - `#inner_light_mode`: Change the mode of the inner light (on/off)  
-Pakage structure: `{ "room": <roomID>, "type": "inner-light-mode", "value": <bool> }`
+Pakage structure: `{ "room": <roomID>, "type": "inner-light-mode", "value": <"0" (off) || "1" (on)> }`
 - `#inner_light_level`: Change the intensity of the inner light  
-Pakage structure: `{ "room": <roomID>, "type": "inner-light-level", "value": <int from 0 to 100 (%)> }`
+Pakage structure: `{ "room": <roomID>, "type": "inner-light-level", "value": <"0" to "100" (%)> }`
 - `#exterior_light_mode`: Change the mode of the exterior light (on/off)  
-Pakage structure: `{ "room": <roomID>, "type": "exterior-light-mode", "value": <bool> }`
+Pakage structure: `{ "room": <roomID>, "type": "exterior-light-mode", "value": <"0" (off) || "1" (on)> }`
 - `#exterior_light_level`: Change the intensity of the exterior light  
-Pakage structure: `{ "room": <roomID>, "type": "exterior-light-level", "value": <int from 0 to 100 (%)> }`
+Pakage structure: `{ "room": <roomID>, "type": "exterior-light-level", "value": <"0" to "100" (%)> }`
 
 
 ## Execution

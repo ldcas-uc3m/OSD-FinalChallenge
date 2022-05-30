@@ -86,27 +86,30 @@
                   </select>
                   <span class="badge bg-success" id="inner_light_mode"></span>
                 </label>
-                <input id="inner_light_level" type="text" value=""> 
+                <input id="inner_light_level" type="text" value="0"> 
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal" onclick="sendInnerLight()">Apply</button>
               </li>
               <li class="list-group-item">
                 <label>Exterior light
                   <select id="exterior_light_mode">
                     <option></option>
-                    <option value="on">On</option>
-                    <option value="off">Off</option>
+                    <option value=0>On</option>
+                    <option value=1>Off</option>
                   </select>
-                  <span class="badge bg-success" id="exterior_light_level"></span>
                 </label>
-                <input id="exterior_light_level" type="text" value=""> 
+                <input id="exterior_light_level" type="text" value="0"> 
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal" onclick="sendExteriorLight()">Apply</button>
               </li>
               <li class="list-group-item">
-                <label> Blinds
-                  <input id="Blinds"type="text">
+                <label>Blinds
+                  <input id="blinds" type="text" value="0">
+                  <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal" onclick="sendBlinds()">Apply</button>
                 </label>
               </li>
             </ul>
           </div>
           <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="sendAll()" >Apply all</button>
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
           </div>
         </div>
