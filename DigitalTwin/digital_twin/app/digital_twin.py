@@ -195,7 +195,7 @@ def on_message_1833(client, userdata, msg):
         TEMPERATURE_TOPIC = TELEMETRY_TOPIC + "/temperature"
         HUMIDITY_TOPIC = TELEMETRY_TOPIC + "/humidity"
         AIR_TOPIC = TELEMETRY_TOPIC + "/air"
-        BLINDS_TOPIC = TELEMETRY_TOPIC + "/blind"
+        BLINDS_TOPIC = TELEMETRY_TOPIC + "/blinds"
         IN_LIGHT_TOPIC = TELEMETRY_TOPIC + "/inner-light"
         EX_LIGHT_TOPIC = TELEMETRY_TOPIC + "/exterior-light"
         PRESENCE_TOPIC = TELEMETRY_TOPIC + "/presence"
