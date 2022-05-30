@@ -122,16 +122,16 @@ def on_message(client, userdata, msg):
         sensors["blinds"]["level"] = payload["level"]
     elif topic[-1] == "inner-light-mode":
         print("inner-light-mode command received:", payload)
-        sensors["inner_light_conditioner"]["on"] = payload["on"]
+        sensors["inner_light"]["on"] = payload["on"]
     elif topic[-1] == "inner-light-level":
         print("inner-light-level command received:", payload)
-        sensors["inner_light_conditioner"]["level"] = payload["level"]
+        sensors["inner_light"]["level"] = payload["level"]
     elif topic[-1] == "exterior-light-mode":
         print("exterior-light-mode command received:", payload)
-        sensors["exterior_light_conditioner"]["on"] = payload["on"]
+        sensors["exterior_light"]["on"] = payload["on"]
     elif topic[-1] == "exterior-light-level":
         print("exterior-light-level command received:", payload)
-        sensors["exterior_light_conditioner"]["level"] = payload["level"]
+        sensors["exterior_light"]["level"] = payload["level"]
         
 
 if __name__ == "__main__":
