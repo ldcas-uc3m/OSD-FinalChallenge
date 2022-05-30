@@ -267,17 +267,7 @@ To get the sensor data for the frontend, we do one query per room, per device, i
 #### `frontend`
 It's built using Apache, and consists of a simple HTML + CSS + JS.  
 The website generates the rooms layout using TDs through JS, and then launches `GET` requests, each 3 seconds, to the backend in order to receive the data of the rooms.  
-It expects that data to be of the format:  
-```
-[
-    {
-        "room": <roomId>,
-        "type": <sensor/device>,
-        "value": <level>
-    },
-    [...]
-]
-```
+It expects that data to be of the format: `[ { "room": <roomId>, "type": <sensor/device>, "value": <level> }, ... ]`
 
 In order to send commands to the RPi, the frontend sends JSONs to the backend, through a `POST` request.  
 The formats, depending on the action, are the following:
