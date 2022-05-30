@@ -7,6 +7,7 @@ var backend_api_port = "5001"
 
 var backend_url = "http://" + backend_api_address + ":" + backend_api_port + "/device_state"
 
+
 var get_current_sensor_data = function() {
     // get room data from backend
     console.log("Requesting data from backend")
@@ -17,6 +18,7 @@ var get_current_sensor_data = function() {
         console.log(data)
     });
 }
+
 
 var draw_rooms = function(){
     // use TDs to draw the room objects on the website
@@ -40,6 +42,7 @@ var draw_rooms = function(){
     }
 }
 
+
 $("#air_mode").change(function(){
     var value = $(this).val()
     $.ajax({
@@ -48,7 +51,7 @@ $("#air_mode").change(function(){
         data: JSON.stringify({
             "room":$("#room_id").text(),
             "type":"air-mode",
-            "value":value
+            "value": parseInt(value)
         }),
         contentType: 'application/json'
     });
@@ -65,11 +68,12 @@ $("#inner_light_mode").change(function(){
         data: JSON.stringify({
             "room":$("#room_id").text(),
             "type":"inner-light-mode",
-            "value":value
+            "value": parseInt(value)
         }),
         contentType: 'application/json'
     });
 })
+
 
 $("#inner_light_level").change(function(){
     var value = $(this).val()
@@ -79,11 +83,12 @@ $("#inner_light_level").change(function(){
         data: JSON.stringify({
             "room":$("#room_id").text(),
             "type":"inner-light-mode",
-            "value":value
+            "value": parseInt(value)
         }),
         contentType: 'application/json'
     });
 })
+
 
 $("#exterior_light_mode").change(function(){
     var value = $(this).val()
@@ -93,11 +98,12 @@ $("#exterior_light_mode").change(function(){
         data: JSON.stringify({
             "room":$("#room_id").text(),
             "type":"exterior_light_mode",
-            "value":value
+            "value": parseInt(value)
         }),
         contentType: 'application/json'
     });
 })
+
 
 $("#exterior_light_level").change(function(){
     var value = $(this).val()
@@ -107,11 +113,12 @@ $("#exterior_light_level").change(function(){
         data: JSON.stringify({
             "room":$("#room_id").text(),
             "type":"exterior_light_level",
-            "value":value
+            "value": parseInt(value)
         }),
         contentType: 'application/json'
     });
 })
+
 
 $("#blinds").change(function(){
     var value = $(this).val()
@@ -121,11 +128,12 @@ $("#blinds").change(function(){
         data: JSON.stringify({
             "room":$("#room_id").text(),
             "type":"blinds",
-            "value":value
+            "value": parseInt(value)
         }),
         contentType: 'application/json'
     });
 })
+
 
 $("#rooms").on("click", "td", function() {
     // unpackage data from backend
