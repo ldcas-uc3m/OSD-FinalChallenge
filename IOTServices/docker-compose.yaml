@@ -108,3 +108,20 @@ services:
       - data_ingestion_microservice
     links: 
       - message_router
+  
+  rooms_management:
+    build: ./rooms_management
+    environment:
+      - MQTT_USER=dso_server
+      - MQTT_PASSWORD=dso_password
+      - MQTT_SERVER_ADDRESS=mqtt-1
+      - MQTT_SERVER_PORT=1883
+      - DATA_INGESTION_API_ADDRESS=data_ingestion_microservice
+      - DATA_INGESTION_API_PORT=5000
+      - PYTHONBUFFERED=1
+    volumes:
+      - ./rooms_management/app:/etc/usr/src/app
+    depends_on:
+      - mqtt-1
+      - mqtt-2
+      - data_ingestion_microservice

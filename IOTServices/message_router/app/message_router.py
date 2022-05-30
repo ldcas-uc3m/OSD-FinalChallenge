@@ -44,8 +44,6 @@ def on_connect(client, userdata, flags, rc):
     # subscribe to all topics
     client.subscribe(ALL_TOPICS)
     print("Subscribed to", ALL_TOPICS)
-    client.subscribe(CONFIG_TOPIC)
-    print("Subscribed to", CONFIG_TOPIC)
 
 
 def on_message(client, userdata, msg):
@@ -55,21 +53,7 @@ def on_message(client, userdata, msg):
     print("Message received in", msg.topic, "with message", msg.payload.decode("utf-8"))
     topic = (msg.topic).split("/")
     
-    if topic[-1] == "config":
-        # configure client
-        if (saved_rooms.get(msg.payload.decode("utf-8"))== None):  # check room is not already saved
-            # change container id to a number to identify the room
-            room_name = "Room" + str(index_room)
-
-            saved_rooms[msg.payload.decode("utf-8")] = room_name  # save room
-            print("Digital Twin with id", msg.payload.decode("utf-8"), "saved as", room_name)
-
-            index_room += 1
-
-            client.publish(msg.topic + "/room", payload = room_name, qos=0, retain = True)
-            print("Published", room_name, "in", msg.topic, "topic")
-
-    elif "telemetry" in topic:
+    if "telemetry" in topic:
         payload = json.loads(msg.payload.decode("utf-8"))  # unload payload
 
         room_name = topic[2]
@@ -79,8 +63,18 @@ def on_message(client, userdata, msg):
             # get value
             if topic[-1] == "air":  # special case
                 level = payload["value"]
-                mode = payload["mode"]
-                # post
+                # translate modes into numbers (0 = off, 1 = cold, 2 = hot)
+                if payload["mode"] == "off":
+                    mode = 0
+                elif payload["mode"] == "cold":
+                    mode = 1
+                elif payload["mode"] == "hot":
+                    mode = 2
+                else:
+                    print("Incorrect parameter")
+                    return
+
+                # post data
                 requests.post(
                     DATA_INGESTION_API_URL + "/device_state",
                     json={"room":room_name, "type": topic[-1] + "-level", "value":level}
@@ -95,7 +89,15 @@ def on_message(client, userdata, msg):
 
             elif topic[-1] in ("inner-light", "exterior-light"):
                 level = payload["value"]
-                mode = payload["on"]
+                # translate modes into numbers (0 = off, 1 = on)
+                if payload["mode"] == "off":
+                    mode = 0
+                elif payload["mode"] == "on":
+                    mode = 1
+                else:
+                    print("Incorrect parameter")
+                    return
+
                 # post
                 requests.post(
                     DATA_INGESTION_API_URL + "/device_state",

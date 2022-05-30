@@ -70,6 +70,20 @@ curr_ex_light_level_comm = 0
 ex_light_level_comm = 0
 curr_presence_comm = False
 
+# scaling - RPies connected
+def calculated_connected_rooms():
+    # create a tuple of rooms to be connected
+    rooms = []
+
+    for i in range(1, int(os.getenv("NUMBER_RPIES")) + 1):
+        rooms.append("Room" + str(i))
+
+    return tuple(rooms)
+
+
+CONNECTED_ROOMS = calculated_connected_rooms()
+is_connected = False  # if it's waiting data from a RPi
+
 
 # ---
 # Randomize
@@ -166,7 +180,7 @@ def on_connect_1883(client, userdata, flags, rc):
 
 
 def on_message_1833(client, userdata, msg):
-    global room_number, TELEMETRY_TOPIC, TEMPERATURE_TOPIC, HUMIDITY_TOPIC, BLINDS_TOPIC, IN_LIGHT_TOPIC, EX_LIGHT_TOPIC, PRESENCE_TOPIC, AIR_TOPIC, DISCONN_TOPIC
+    global room_number, is_connected, TELEMETRY_TOPIC, TEMPERATURE_TOPIC, HUMIDITY_TOPIC, BLINDS_TOPIC, IN_LIGHT_TOPIC, EX_LIGHT_TOPIC, PRESENCE_TOPIC, AIR_TOPIC, DISCONN_TOPIC
 
     print("Message received in MQTT-1 with topic", msg.topic, "and message", msg.payload.decode())
 
@@ -175,7 +189,6 @@ def on_message_1833(client, userdata, msg):
     if topic[-1] == "room":
         # setup room number
         room_number = msg.payload.decode()  # we ALWAYS have to decode the payload
-        print("Room number received as:", room_number)
 
         # update topics
         TELEMETRY_TOPIC = "hotel/rooms/" + room_number + "/telemetry"
@@ -187,6 +200,11 @@ def on_message_1833(client, userdata, msg):
         EX_LIGHT_TOPIC = TELEMETRY_TOPIC + "/exterior-light"
         PRESENCE_TOPIC = TELEMETRY_TOPIC + "/presence"
         DISCONN_TOPIC = "hotel/rooms/" + room_number + "/disconn"
+
+        # update state
+        if room_number in CONNECTED_ROOMS: is_connected = True
+
+        print("Room number received as:", room_number, "(Connected to RPi:", str(is_connected), "\b)")
 
     elif "command" in topic:
         # forward command
@@ -231,7 +249,7 @@ def on_connect_1884(client, userdata, flags, rc):
 def on_message_1884(client, userdata, msg):
     # pass data from RPi
 
-    global humidity, temperature, air_level, air_mode, blinds, in_light, ex_light, presence
+    global humidity, temperature, air, blinds, in_light, ex_light, presence
 
     print("Message received in MQTT-2 with topic", msg.topic, "and message", msg.payload.decode())
 
@@ -244,8 +262,7 @@ def on_message_1884(client, userdata, msg):
     elif topic[-1] == "humidity":
         humidity = payload
     elif topic[-1] == "air":
-        air_mode = payload
-        air_level = payload
+        air = payload
     elif topic[-1] == "inner-light":
         in_light = payload
     elif topic[-1] == "exterior-light":
@@ -253,8 +270,15 @@ def on_message_1884(client, userdata, msg):
     elif topic[-1] == "presence":
         presence = payload
     
-    # TODO: disconnect
-    # elif topic[-1] == "disconn":
+    elif topic[-1] == "disconn":
+        # RPi has disconnected, set all devices to false
+        temperature["active"] = False
+        humidity["active"] = False
+        air["active"] = False
+        in_light["active"] = False
+        ex_light["active"] = False
+        presence["active"] = False
+
 
 
 # ---
@@ -281,7 +305,7 @@ def connect_mqtt_1():
     client.subscribe(COMMANDS_TOPIC)
     print("Suscribed on MQTT-1 to", COMMANDS_TOPIC)
 
-    while room_number == "Room1":  # if this room receives from RPi
+    while is_connected:  # this room receives from RPi
         # check if data has been received on mqtt-2
         published = False  # to signal data has been published
 
@@ -295,7 +319,7 @@ def connect_mqtt_1():
             curr_humidity = humidity
             published = True
         if air != curr_air:
-            client.publish(AIR_TOPIC, payload = air_level, qos = 0, retain = False)
+            client.publish(AIR_TOPIC, payload = air, qos = 0, retain = False)
             curr_air = air
             published = True
         if in_light != curr_in_light:
@@ -315,12 +339,11 @@ def connect_mqtt_1():
             curr_blinds = blinds
             published = True
         
-        # TODO: (maybe?) send info about mode of sensors
 
         if published: print("Sent to MQTT-1 data from RPi")
         time.sleep(2)
     
-    while room_number != "Room1":
+    while not is_connected:
         # generate sensor data
         randomize_sensors()
         # we need to convert data to JSON so it's binarizable and can be sent to the server

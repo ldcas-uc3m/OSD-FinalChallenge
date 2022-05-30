@@ -1,4 +1,4 @@
-# Operating Systems Desing: Final Challenge
+# Operating Systems Design: Final Challenge
 By Luis Daniel Casais Mezquida, Iván Darío Cersósimo and Hashim Mahmood  
 Operating Systems Design 21/22
 Bachelor's Degree in Computer Science and Engineering, grp. 89  
@@ -11,7 +11,8 @@ Hello there!
   
 We know this is a _big_, _chonky_ README, but it's mainly documentation for the future (so that in like, 10 years, we can look back at this project and not die trying to figure out how everything worked).  
   
-You can read it all, but the parts you're probably more interested in are the [Implementation](#implementation) chapter, that covers how it all works (we changed stuff a bit, and added some other stuff such as the Adminer), the [Rooms Management Microservice](#rooms-management-microservice) architecture part, and the pin layout for the RPi you can find in [Execution](#execution), step 5.  
+You can read it all, but the parts you're probably more interested in are the [Implementation](#implementation) chapter, that covers how it all works (we changed stuff a bit, and added some other stuff such as the Adminer), the [Rooms Management Microservice](#rooms-management-microservice) and [Data Ingestion microservice/ReST API](#data-ingestion-microservicerest-api) architecture part, and the [Execution](#execution) chapter, mainly steps 3 (setup variables) & 5 (setup RPi).  
+Also maybe check out [Scaling](#scaling) (?).   
   
 Regards!
 
@@ -38,12 +39,14 @@ Regards!
         6. [`mariaDB`](#mariadb)
         7. [`adminer`](#adminer)
         8. [`data_ingestion_microservice`](#dataingestionmicroservice)
-        9. [`frontend`](#frontend)
+        9. [`rooms_management`](#roomsmanagement)
+        10. [`frontend`](#frontend)
 3. [Execution](#execution)
 4. [Use, debugging & other commands](#use-debugging--other-commands)
-    1. [MariaDB](#mariadb)
-    2. [Adminer](#adminer)
-    3. [Frontend](#frontend)
+    1. [Scaling](#scaling)
+    2. [MariaDB](#mariadb)
+    3. [Adminer](#adminer)
+    4. [Frontend](#frontend)
 
 
 ## Problem description
@@ -77,11 +80,10 @@ The RPis will also subscribe to the topic `hotel/rooms/<room_id>/command/<comman
 #### Digital Twin
 The Digital Twins are an intermediate layer between the Raspberry Pies and the Message Router.  
 They are connected to both MQTTs, and receive the information from the RPis through MQTT-2 (therefore they are subscribed to `hotel/rooms/+/telemetry/+`). If the information has changed from the last time, they pass that information to the Message Router, through the MQTT-1, and the topic `hotel/rooms/<room_id>/telemetry/<sensor/device>`. They also relay the commands from the router to the RPis (therefore they are subscribed to `hotel/rooms/<room_id>/command/+`).  
-In order to configure the room, that is, to get its room id, they publish their hostname to `hotel/rooms/<hostname>/config` and wait for the response (the assigned room id) from the message router (so they are subscribed to `hotel/rooms/<hostname>/config/rooms`).  
+In order to configure the room, that is, to get its room id, they publish their hostname to `hotel/rooms/<hostname>/config` and wait for the response (the assigned room id) from the rooms management (so they are subscribed to `hotel/rooms/<hostname>/config/rooms`).  
 
 #### Message Router
 The message router gets the information from the Digital Twins and sends it to de Data Ingestion ReST API.  
-It is also in charge of configuring, and saving, the room ids for the Digital Twins, waiting for the message and subscribing to the topic `hotel/rooms/+/config`, and publishing the id in `hotel/rooms/<hostname>/config/rooms`.  
 And finally, it relays the commands from the backend through `hotel/rooms/<room_id>/command/<command>`. For this, it also implements a small ReST API inside it.
 
 #### Data Ingestion microservice/ReST API
@@ -96,16 +98,18 @@ This API is in charge of managing the requests sent from the Frontend.
 It asks for the data to the Data Ingestion microservice, and passes the commands to the Message Router.
 
 #### Website Frontend
-This website actuates as an interface to monitor the state of each room, and send some commands to change the state.
+This website actuates as an interface to monitor the state of each room (sensors and devices), and send some commands to change the state.
 
 #### Rooms Management Microservice
+The rooms management microservice is in charge of configuring, and saving, the room ids for the Digital Twins, waiting for the message and subscribing to the topic `hotel/rooms/+/config`, and publishing the id in `hotel/rooms/<hostname>/config/rooms`.  
+It's also in charge of saving the devices state (active/inactive), and logging connections and disconnections.
 
 ### Implementation
 We've chosen to use Docker and Docker-compose to implement our solutions, for its reliability, ease of use, and scalability.  
 Two machines will be needed to run the management, plus one RPi per room. The first machine, DigitalTwin, will host the Digital Twins, while the second one, IOTServices, will host the rest (MQTTs, Data Ingestion, MariaDB, Message Router, Adminer, Webapp Backend and Frontend).  
 This is prepared to be deployed on two virtual machines, but it also works for real machines (that is, running Linux).  
   
-One Docker container will be used for each element (except `raspberry`).
+One Docker container will be used for each element (except `raspberry`, which is to be run on an actual Raspberry Pi).
 
 #### `raspberry`
 This is to be run on an actual Raspberry Pi.  
@@ -117,6 +121,7 @@ The RGB LED signals the state of the AC: it turs blue if it's in cold mode, red 
 The servo motor is used to control the blinds, from 0º (closed) to 180º (open).  
 The other lights also use PWMs to control the intensity, and can be turned on or off.
 <!-- TODO: describe automatic stuff -->
+
   
 The raspberry is also able to receive commands from the MQTT-2, which overwrite its state, and are able to control the devices.  
 The commands are:
@@ -187,7 +192,8 @@ A message through this topic is used as a LWT (Last Will and Testament) of an RP
 ##### Subscriptions
 Each client is subscribed to different topics, as such:
 - MQTT-1:
-    - `message_router`: `hotel/rooms/+/config`, `hotel/rooms/+/telemetry/+`
+    - `message_router`: `hotel/rooms/+/telemetry/+`
+    - `rooms_management`: `hotel/rooms/+/config`, `hotel/rooms/+/telemetry/+`
     - `digital_twin`: `hotel/rooms/<id>/config/rooms`, `hotel/rooms/<room_id>/command/+`
 - MQTT-2:
     - `raspberry`/`digital_raspberry`: `hotel/rooms/<room_id>/command/+`
@@ -200,17 +206,62 @@ Each client is subscribed to different topics, as such:
 
 
 #### `mariaDB`
+By setting up enviroment variables for the mariaDB image on the docker-compose, we automatically create a new MySQL database, `dso_db`, and setup credentials.  
+By linking volumes, we also save the data from the DBMS to `IOTServices/mariaDB/data`, and automatically run a script in order to create the tables, `IOTServices/mariaDB/scripts/init.sql`.  
+  
+This script creates two tables:  
+- `device_state`: A table to save the values of the sensors/devices, with its timestamp.  
+
+| Attribute | Type        | PK? | Null? | Other          |
+|:---------:|-------------|-----|-------|----------------|
+| id        | MEDIUMINT   | x   |       | AUTO_INCREMENT |
+| room      | VARCHAR(10) |     |       |                |
+| type      | VARCHAR(20) |     |       |                |
+| value     | TYNYINT     |     |       |                |
+| date      | DATETIME    |     |       |                |
+
+Note: in the case of `type` = `air-mode`, 0 = off, 1 = cold and 2 = hot. In the case of `type` = `inner-light-mode` or `exterior-light-mode`, 0 = off and 1 = on.
+
+- `device_log`: Registers the connections and disconnections of the sensors for each room, with its timestamp.
+
+| Attribute | Type        | PK? | Null? | Other          |
+|:---------:|-------------|-----|-------|----------------|
+| id        | MEDIUMINT   | x   |       | AUTO_INCREMENT |
+| room      | VARCHAR(10) |     |       |                |
+| device    | VARCHAR(20) |     |       |                |
+| state     | BOOLEAN     |     |       |                |
+| date      | DATETIME    |     |       |                |
+
+Note: in `state`, 1 = connect and 0 = disconnect.
 
 
 #### `adminer`
 The Adminer image provides a web interface for the mariaDB, and it uses port `8080` for the website. 
 
 #### `data_ingestion_microservice`
+This service is divided into two scripts: `data_ingestion_api_rest` serves as an ReST API to receive requests, and `data_ingestion` provides the functions in order to operate with the mariaDB.  
 
+<!-- TODO: finish data ingestion -->
+
+#### `rooms_management`
+
+<!-- TODO: rooms_management -->
 
 #### `frontend`
+The website generates the rooms layout using TDs, and then launches `GET` requests, each 3 seconds, to the backend in order to receive the data of the rooms.  
+It expects that data to be of the format:  
+```
+[
+    {
+        "room": <roomId>,
+        "type": <sensor/device>,
+        "value": <level>
+    },
+    [...]
+]
+```
 
-In order to send commands to the RPi, the frontend sends JSONs to the backend.  
+In order to send commands to the RPi, the frontend sends JSONs to the backend, through a `POST` request.  
 The formats, depending on the action, are the following:
 - `#air_mode`: Change the air conditioner mode (cold, hot, off)  
 Pakage structure: `{ "room": <roomID>, "type": "air-mode", "value": <"cold" | "hot" | "off"> }`
@@ -260,6 +311,8 @@ The pins are:
 | RED     | GPIO17   |
 | BLUE    | GPIO18   |
 | GREEN   | GPIO27   |
+| WHITE   | GPIO26   |
+| YELLOW  | GPIO06   |
 | BUTTON  | GPIO16   |
 | DHT     | GPIO04   |
 | SERVO   | GPIO14   |
@@ -287,6 +340,14 @@ chmod +x launch.sh
 
 ## Use, debugging & other commands
 
+### Scaling
+This is prepared to be run with only one Raspberry Pie, but it's prepared to be scaled.  
+To do that, you have to do some things:
+1. Each RPi has its room number "hardwired", so the code run on each RPi must be edited manually. To do that, modify the variable `ROOM_ID` in `Raspberry/sensors.py` (set it to `"Room2`, etc.)
+2. The number of RPies connected must be updated in `DigitalTwin/docker-compose.yaml`, `NUMBER_RPIES` enviroment variable in `digital_twin`.
+
+Take into account that you can also tune the number of Digital Twins (by default, 4), in `DigitalTwin/launch_instances.sh`. Remember Twins without connected RPies will generate random data.
+
 ### MariaDB
 - To enter the container, run:
 ```bash
@@ -295,10 +356,6 @@ docker exec –it iotservices_mariaDB_1 mysql –u dso_db –pdso_db_password
 - To enter the database, run:
 ```sql
 use dso_db;
-```
-- To see the table, run:
-```sql
-SELECT * FROM device_state ORDER BY date DESC LIMIT 100;
 ```
 
 ### Adminer

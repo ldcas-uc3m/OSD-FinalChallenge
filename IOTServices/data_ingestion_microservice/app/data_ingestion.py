@@ -9,6 +9,7 @@ DB_HOST = os.getenv("DB_HOST")
 DB_USER = os.getenv("DB_USER")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
 DB_NAME = os.getenv("DB_NAME")
+DB_NAME = os.getenv("DB_NAME")
 
 NUMBER_ROOMS = int(os.getenv("NUMBER_ROOMS"))
 
@@ -40,21 +41,29 @@ def insert_device_state(params):
         return mycursor
 
 
+def insert_device_log(params):
+    mydb = connect_database()
+
+    with mydb.cursor() as mycursor:
+        sql = "INSERT INTO device_log (room, device, state, date) VALUES (%s, %s, %s, %s)"
+        values = (
+            params["room"],
+            params["device"],
+            params["active"],
+            datetime.now()
+        )
+        
+        mycursor.execute(sql, values)  # run query
+
+        mydb.commit()
+        mydb.close()
+
+        return mycursor
+
+
+
 def get_device_state():
     mydb = connect_database()
-    # r = []
-    # with mydb.cursor() as mycursor:
-    #     mycursor.execute("SELECT * FROM device_state ORDER BY date ASC")
-    #     myresult = mycursor.fetchall()
-    #     for id, room, type, value, date in myresult:
-    #         r.append({
-    #             "room": room,
-    #             "type": type,
-    #             "value": value,
-    #             "date": str(date)
-    #         })
-    #     mydb.close()
-    # return r
 
     response = []
     with mydb.cursor() as mycursor:

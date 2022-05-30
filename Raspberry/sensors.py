@@ -1,8 +1,9 @@
-import sys, time, schedule, Adafruit_DHT
+import sys, time, schedule, json, Adafruit_DHT
 import RPi.GPIO as GPIO
 from threading import Thread
 import paho.mqtt.client as mqtt
 
+# TODO: $ pip freeze -r > requirements.txt
 
 # CONSTANTS
 MOTOR1A = 24
@@ -15,7 +16,7 @@ BLUE_PIN = 18
 GREEN_PIN = 27
 BUTTON_GPIO = 16
 WHITE_PIN = 26
-BLU_PIN = 6
+YELLOW_PIN = 6
 SERVO_PIN = 14
 
 # GPIO SETUP
@@ -27,13 +28,13 @@ GPIO.setup(MOTOR1E, GPIO.OUT)
 GPIO.setup(RED_PIN, GPIO.OUT)
 GPIO.setup(BLUE_PIN, GPIO.OUT)
 GPIO.setup(GREEN_PIN, GPIO.OUT)
-GPIO.setup(BLU_PIN, GPIO.OUT)
+GPIO.setup(YELLOW_PIN, GPIO.OUT)
 GPIO.setup(WHITE_PIN, GPIO.OUT)
 GPIO.setup(SERVO_PIN, GPIO.OUT)
 
 # Pulse Width Modulation
 motor_pwm = GPIO.PWM(MOTOR1E, 100)
-blu_pwm = GPIO.PWM(BLU_PIN, 100)  # for exterior light
+blu_pwm = GPIO.PWM(YELLOW_PIN, 100)  # for exterior light
 white_pwm = GPIO.PWM(WHITE_PIN, 100)  # for inner light
 servo_pwm = GPIO.PWM(14, 50)
 
@@ -150,9 +151,9 @@ def threads():
 #         update_blu(0,0)
 #         #update_white(0, 0)
 def ext_on():
-    update_blu(1,100)
+    update_ext_light(1,100)
 def ext_off():
-    update_blu(0, 0)
+    update_ext_light(0, 0)
 
 def ext_schedule():
     start_time = "20:00"
@@ -192,17 +193,17 @@ def servo():
 
 # we will recieve values in this funtion to update the global variable
 # Note: To turn on the light the status needs to be True
-def update_blu(status, intensity):
+def update_ext_light(status, intensity):
     global sensors
     # status = int(input('Enter the light status: '))
     # intensity = float(input('Enter the light Intensity: '))
     sensors["exterior_light"]["on"] = status
     sensors["exterior_light"]["level"] = intensity
     print("The status of blue external lights is {} and the intensity is {}\n".format(sensors["exterior_light"]["on"], sensors["inner_light"]["level"]))
-    blu()
+    ext_light()
 
 
-def blu():
+def ext_light():
     global sensors
 
     try:
@@ -218,7 +219,7 @@ def blu():
         sensors["exterior_light"]["active"] = False
 
 
-def update_white(status, intensity):
+def update_inner_light(status, intensity):
     # we will recieve values in this funtion to update the global variable
     global sensors
     # status = int(input('Enter the white light status: '))
@@ -226,10 +227,10 @@ def update_white(status, intensity):
     sensors["inner_light"]["on"] = status
     sensors["inner_light"]["level"] = intensity
     print("The status of white internal lights is {} and the intensity is {}\n".format(sensors["inner_light"]["on"], sensors["inner_light"]["level"]))
-    white()
+    inner_light()
 
 
-def white():
+def inner_light():
     global sensors
 
     try:
@@ -378,20 +379,42 @@ def button():
 # MQTT
 # ---
 def on_connect(client, userdata, flags, rc):
-    print("Raspberry connected to MQTT-2")
+    print("Digital Raspberry connected to MQTT-2")
     client.subscribe(COMMAND_TOPIC)
     print("Subscribed to", COMMAND_TOPIC)
 
 
 def on_message(client, userdata, msg):
-    global sensors, dc
+    global sensors
 
-    print("Message received in MQTT-2 with topic", msg.topic, "and message", msg.payload.decode())
+    print("Message received with topic", msg.topic, "and message", msg.payload.decode())
 
     topic = (msg.topic).split("/")
-    if topic[-1] == "air-conditioner":
-        print("Air conditioner command received:", msg.payload.decode())
-        # TODO: commands receiver
+    payload = json.loads(msg.payload.decode())
+
+    # change sensors accordingly
+    if topic[-1] == "air-mode":
+        print("air-mode command received:", payload)
+        sensors["air_conditioner"]["mode"] = payload["mode"]
+    elif topic[-1] == "air-level":
+        print("air-level command received:", payload)
+        sensors["air_conditioner"]["level"] = payload["level"]
+    elif topic[-1] == "blinds":
+        print("air-level command received:", payload)
+        sensors["blinds"]["level"] = payload["level"]
+    elif topic[-1] == "inner-light-mode":
+        print("inner-light-mode command received:", payload)
+        sensors["inner_light_conditioner"]["on"] = payload["on"]
+    elif topic[-1] == "inner-light-level":
+        print("inner-light-level command received:", payload)
+        sensors["inner_light_conditioner"]["level"] = payload["level"]
+    elif topic[-1] == "exterior-light-mode":
+        print("exterior-light-mode command received:", payload)
+        sensors["exterior_light_conditioner"]["on"] = payload["on"]
+    elif topic[-1] == "exterior-light-level":
+        print("exterior-light-level command received:", payload)
+        sensors["exterior_light_conditioner"]["level"] = payload["level"]
+        
 
 
 def on_disconnect(client, userdata, rc):
@@ -409,7 +432,6 @@ def on_disconnect(client, userdata, rc):
 
 def send_data(client):
     # sends the sensor data
-    # TODO: change payloads to include ["active"] & JSON format
     client.publish(TEMPERATURE_TOPIC, payload=sensors["temperature"]["temperature"], qos=0, retain=False)
     client.publish(HUMIDITY_TOPIC, payload=sensors["humidity"]["humidity"], qos=0, retain=False)
     client.publish(IN_LIGHT_TOPIC, payload=sensors["inner_light"]["level"], qos=0, retain=False)
@@ -418,7 +440,7 @@ def send_data(client):
     client.publish(PRESENCE_TOPIC, payload=sensors["presence"]["is_detected"], qos=0, retain=False)
     client.publish(BLINDS_TOPIC, payload=sensors["blinds"]["angle"], qos=0, retain=False)
     print("Sent to sensor data to topic", TELEMETRY_TOPIC)
-    # TODO: send data function
+    # TODO: send data function. change payloads to include ["active"] & JSON format
 
 
 def connect_mqtt():
