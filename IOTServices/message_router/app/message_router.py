@@ -126,9 +126,26 @@ def on_message(client, userdata, msg):
 
 def send_command(params):
 
-    type_dev = params["type"]
-    value = params["value"]
     room = params["room"]
+    type_dev = params["type"]
+
+    # translate numbers to modes
+    if topic[-1] == "air":
+        if params["value"] == 0:
+            value = "off"
+        elif params["value"] == 1:
+            value = "cold"
+        elif params["value"] == 2:
+            value = "hot"
+    elif topic[-1] in ("inner-light-mode", "exterior_light_mode"):
+        if params["value"] == 0:
+            value = "off"
+        elif params["value"] == 1:
+            value = "on"
+    else:
+        value = params["value"]
+
+
     topic = "hotel/rooms/" + room + "/command/" + type_dev
     
     if type_dev == "air-mode":

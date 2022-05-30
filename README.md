@@ -63,7 +63,7 @@ Throught the frontend, the user will be able to get the state information from a
 ### Architecture
 The diagram for the architecture of the implementation is the following:  
 
-![architecture diagram](img/architecture_diagram.svg)
+![Architecture diagram](img/architecture_diagram.svg)
   
 The architecture consists of the Raspberry Pies, two MQTT routers (MQTT-1, the top one, and MQTT-2, the bottom one), Digital Twins, a Message Router, the Data Ingestion ReST API, a MariaDB DBMS, and the website Frontend and Webapp Backend ReST API.
 
@@ -213,7 +213,7 @@ This script creates two tables:
 - `device_state`: A table to save the values of the sensors/devices, with its timestamp.  
 
 | Attribute | Type        | PK? | Null? | Other          |
-|:---------:|-------------|-----|-------|----------------|
+|-----------|-------------|:---:|:-----:|----------------|
 | id        | MEDIUMINT   | x   |       | AUTO_INCREMENT |
 | room      | VARCHAR(10) |     |       |                |
 | type      | VARCHAR(20) |     |       |                |
@@ -225,7 +225,7 @@ Note: in the case of `type` = `air-mode`, `0` = off, `1` = cold and `2` = hot. I
 - `device_log`: Registers the connections and disconnections of the sensors for each room, with its timestamp.
 
 | Attribute | Type        | PK? | Null? | Other          |
-|:---------:|-------------|-----|-------|----------------|
+|-----------|-------------|:---:|:-----:|----------------|
 | id        | MEDIUMINT   | x   |       | AUTO_INCREMENT |
 | room      | VARCHAR(10) |     |       |                |
 | device    | VARCHAR(20) |     |       |                |
@@ -311,14 +311,13 @@ The pins are:
 | MOTOR1A    | GPIO24   |
 | MOTOR1B    | GPIO23   |
 | MOTOR1E    | GPIO25   |
-| DHT        | GPIO04   |
 | RED LED    | GPIO17   |
 | BLUE LED   | GPIO18   |
 | GREEN LED  | GPIO27   |
 | WHITE LED  | GPIO26   |
 | YELLOW LED | GPIO06   |
 | BUTTON     | GPIO16   |
-| DHT11      | GPIO04   |
+| DHT11 DATA | GPIO04   |
 | SERVO      | GPIO14   |
 
 6. On the IOTServices machine, run:

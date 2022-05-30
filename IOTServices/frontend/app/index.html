@@ -70,9 +70,9 @@
                 <label>Mode
                   <select id="air_mode">
                     <option></option>
-                    <option value="cold">Cold</option>
-                    <option value="hot">Hot</option>
-                    <option value="off">Off</option>
+                    <option value=0>Off</option>
+                    <option value=1>Cold</option>
+                    <option value=2>Hot</option>
                   </select>
                   <span class="badge bg-success" id="air_mode"></span>
                 </label> 
@@ -81,12 +81,12 @@
                 <label>Inner light
                   <select id="inner_light_mode">
                     <option></option>
-                    <option value="on">On</option>
-                    <option value="off">Off</option>
+                    <option value=0>Off</option>
+                    <option value=1>On</option>
                   </select>
                   <span class="badge bg-success" id="inner_light_mode"></span>
                 </label>
-                <input id="interior_light_level" type="text" value=""> 
+                <input id="inner_light_level" type="text" value=""> 
               </li>
               <li class="list-group-item">
                 <label>Exterior light
