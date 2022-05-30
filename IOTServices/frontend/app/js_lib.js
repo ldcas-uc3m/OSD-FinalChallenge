@@ -56,7 +56,7 @@ $("#air_mode").change(function(){
         contentType: 'application/json'
     });
     console.log("Posting command")
-    console.log(JSON.stringify({ "room":$("#room_id").text(), "type":"air-mode", "value":value}))
+    console.log(JSON.stringify({ "room":$("#room_id").text(), "type":"air-mode", "value":vparseInt(value)}))
 })
 
 
@@ -72,6 +72,8 @@ $("#inner_light_mode").change(function(){
         }),
         contentType: 'application/json'
     });
+    console.log("Posting command")
+    console.log(JSON.stringify({ "room":$("#room_id").text(), "type":"air-mode", "value":vparseInt(value)}))
 })
 
 
@@ -87,6 +89,8 @@ $("#inner_light_level").change(function(){
         }),
         contentType: 'application/json'
     });
+    console.log("Posting command")
+    console.log(JSON.stringify({ "room":$("#room_id").text(), "type":"air-mode", "value":vparseInt(value)}))
 })
 
 
@@ -102,6 +106,8 @@ $("#exterior_light_mode").change(function(){
         }),
         contentType: 'application/json'
     });
+    console.log("Posting command")
+    console.log(JSON.stringify({ "room":$("#room_id").text(), "type":"air-mode", "value":vparseInt(value)}))
 })
 
 
@@ -117,6 +123,8 @@ $("#exterior_light_level").change(function(){
         }),
         contentType: 'application/json'
     });
+    console.log("Posting command")
+    console.log(JSON.stringify({ "room":$("#room_id").text(), "type":"air-mode", "value":vparseInt(value)}))
 })
 
 
@@ -132,6 +140,8 @@ $("#blinds").change(function(){
         }),
         contentType: 'application/json'
     });
+    console.log("Posting command")
+    console.log(JSON.stringify({ "room":$("#room_id").text(), "type":"air-mode", "value":vparseInt(value)}))
 })
 
 

@@ -127,16 +127,16 @@ def send_command(params):
 
     # translate numbers to modes
     if type_dev == "air-mode":
-        if params["value"] == 0:
+        if params["value"] == "0":
             value = "off"
-        elif params["value"] == 1:
+        elif params["value"] == "1":
             value = "cold"
-        elif params["value"] == 2:
+        elif params["value"] == "2":
             value = "hot"
     elif type_dev in ("inner-light-mode", "exterior_light_mode"):
-        if params["value"] == 0:
+        if params["value"] == "0":
             value = False
-        elif params["value"] == 1:
+        elif params["value"] == "1":
             value = True
     else:
         value = params["value"]
