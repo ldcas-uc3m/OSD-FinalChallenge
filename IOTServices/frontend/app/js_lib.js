@@ -24,9 +24,9 @@ var draw_rooms = function(){
     // use TDs to draw the room objects on the website
     $("#rooms").empty()
     var room_index = 1;
-    for (var i = 0; i < 8; i++) {
+    for (var i = 0; i < 5; i++) {
         $("#rooms").append("<tr id='floor"+i+"'></tr>")
-        for (var j = 0; j < 5; j++) {
+        for (var j = 0; j < 8; j++) {
             $("#floor"+i).append("\
                 <td \
                 data-bs-toggle='modal' \

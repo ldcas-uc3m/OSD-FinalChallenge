@@ -9,8 +9,8 @@ table#rooms td{
     padding: 11px;
     color: #08429899;
     font-weight: bold;
-    width: 80px;
-    height: 80px;
+    width: 90px;
+    height: 90px;
 }
 
 table#rooms td:hover {

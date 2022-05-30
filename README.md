@@ -261,8 +261,10 @@ Inserts are quite straightforward, just putting the values received in the reque
 To get the sensor data for the frontend, we do one query per room, per device, in order to get the latest data. If nothing is found, we send nothing.
 
 #### `rooms_management`
-
-<!-- TODO: rooms_management -->
+The Rooms Management is in charge of two things:
+- Giving the room ids to the Digital Twins, starting with 1 up to whatever, and saving their hostnames and assigned ids.
+- Controlling connections and disconnections of the sensors of each room. It listens for the telemetry info, and saves in a list every active sensor/device that is not saved. If a saved sensor is suddenly inactive (receives that message), then it erases it from its saved rooms (so when it's active again, it saves it again). This allows to send connections and disconnections to the `device_log` table on the mariaDB, as well as its date.  
+The structure of the sent package is: `{"room": room_name, "device": <sensor/device>, "active": <bool>}`
 
 #### `frontend`
 It's built using Apache, and consists of a simple HTML + CSS + JS.  
