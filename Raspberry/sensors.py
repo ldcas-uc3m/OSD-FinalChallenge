@@ -119,21 +119,18 @@ def threads():
     t_sensor = Thread(target=weatherSensor)
     t_ext_scheduler = Thread(target=ext_schedule)
     t_mqtt = Thread(target=connect_mqtt)
-    t_lights = Thread(target=lights)
 
     t_button.setDaemon(True)
     t_motor.setDaemon(True)
     t_sensor.setDaemon(True)
     t_ext_scheduler.setDaemon(True)
     t_mqtt.setDaemon(True)
-    t_lights.setDaemon(True)
 
     t_button.start()
     t_motor.start()
     t_sensor.start()
     t_mqtt.start()
     t_ext_scheduler.start()
-    t_lights.start()
 
     # ##solo testing
     # t_blu2 = Thread(target=check)
@@ -145,15 +142,8 @@ def threads():
     t_motor.join()
     t_sensor.join()
     t_mqtt.join()
-    t_lights.join()
 
 
-def lights():
-    while True:
-        ext_light()
-        inner_light()
-        servo()
-        time.sleep(1)
 
 def ext_on():
     sensors["exterior_light"]["on"] = True
@@ -171,12 +161,12 @@ def ext_schedule():
         time.sleep(1)
 
 
-# def update_servo(angle):
-#     global sensors
-#     # angle = float(input('Enter angle between 0 & 180: '))
-#     sensors["blinds"]["angle"] = angle
-#     print("The angle of servo motor right now is {} \n".format(sensors["blinds"]["angle"]))
-#     servo()
+def update_servo(angle):
+    global sensors
+    # angle = float(input('Enter angle between 0 & 180: '))
+    sensors["blinds"]["angle"] = angle
+    print("The angle of servo motor right now is {} \n".format(sensors["blinds"]["angle"]))
+    servo()
 
 
 def servo():
@@ -200,14 +190,14 @@ def servo():
 
 # we will recieve values in this funtion to update the global variable
 # Note: To turn on the light the status needs to be True
-# def update_ext_light(status, intensity):
-#     global sensors
-#     # status = int(input('Enter the light status: '))
-#     # intensity = float(input('Enter the light Intensity: '))
-#     sensors["exterior_light"]["on"] = status
-#     sensors["exterior_light"]["level"] = intensity
-#     print("The status of blue external lights is {} and the intensity is {}\n".format(sensors["exterior_light"]["on"], sensors["inner_light"]["level"]))
-#     ext_light()
+def update_ext_light(status = sensors["exterior_light"]["on"], intensity = sensors["exterior_light"]["level"]):
+    global sensors
+    # status = int(input('Enter the light status: '))
+    # intensity = float(input('Enter the light Intensity: '))
+    sensors["exterior_light"]["on"] = status
+    sensors["exterior_light"]["level"] = intensity
+    print("The status of blue external lights is {} and the intensity is {}\n".format(sensors["exterior_light"]["on"], sensors["inner_light"]["level"]))
+    ext_light()
 
 
 def ext_light():
@@ -227,15 +217,15 @@ def ext_light():
         sensors["exterior_light"]["active"] = False
 
 
-# def update_inner_light(status, intensity):
-#     # we will recieve values in this funtion to update the global variable
-#     global sensors
-#     # status = int(input('Enter the white light status: '))
-#     # intensity = float(input('Enter the white light Intensity: '))
-#     sensors["inner_light"]["on"] = status
-#     sensors["inner_light"]["level"] = intensity
-#     print("The status of white internal lights is {} and the intensity is {}\n".format(sensors["inner_light"]["on"], sensors["inner_light"]["level"]))
-#     inner_light()
+def update_inner_light(status = sensors["inner_light"]["on"], intensity = sensors["inner_light"]["level"]):
+    # we will recieve values in this funtion to update the global variable
+    global sensors
+    # status = int(input('Enter the white light status: '))
+    # intensity = float(input('Enter the white light Intensity: '))
+    sensors["inner_light"]["on"] = status
+    sensors["inner_light"]["level"] = intensity
+    print("The status of white internal lights is {} and the intensity is {}\n".format(sensors["inner_light"]["on"], sensors["inner_light"]["level"]))
+    inner_light()
 
 
 def inner_light():
@@ -418,19 +408,19 @@ def on_message(client, userdata, msg):
         sensors["air_conditioner"]["level"] = payload["level"]
     elif topic[-1] == "blinds":
         print("blinds command received:", payload)
-        sensors["blinds"]["level"] = payload["level"]
+        update_servo(payload["level"])
     elif topic[-1] == "inner-light-mode":
         print("inner-light-mode command received:", payload)
-        sensors["inner_light"]["on"] = payload["on"]
+        update_inner_light(status = payload["on"])
     elif topic[-1] == "inner-light-level":
         print("inner-light-level command received:", payload)
-        sensors["inner_light"]["level"] = payload["level"]
+        update_inner_light(intensity = payload["level"])
     elif topic[-1] == "exterior-light-mode":
         print("exterior-light-mode command received:", payload)
-        sensors["exterior_light"]["on"] = payload["on"]
+        update_ext_light(status = payload["on"])
     elif topic[-1] == "exterior-light-level":
         print("exterior-light-level command received:", payload)
-        sensors["exterior_light"]["level"] = payload["level"]
+        update_ext_light(intensity = payload["level"])
         
 
 
