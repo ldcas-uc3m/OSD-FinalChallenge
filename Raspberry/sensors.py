@@ -152,12 +152,14 @@ def lights():
     while True:
         ext_light()
         inner_light()
+        servo()
         time.sleep(1)
 
 def ext_on():
-    update_ext_light(1,100)
+    sensors["exterior_light"]["on"] = True
+    sensors["exterior_light"]["level"] = 100
 def ext_off():
-    update_ext_light(0, 0)
+    sensors["exterior_light"]["on"] = False
 
 def ext_schedule():
     start_time = "20:00"
@@ -169,12 +171,12 @@ def ext_schedule():
         time.sleep(1)
 
 
-def update_servo(angle):
-    global sensors
-    # angle = float(input('Enter angle between 0 & 180: '))
-    sensors["blinds"]["angle"] = angle
-    print("The angle of servo motor right now is {} \n".format(sensors["blinds"]["angle"]))
-    servo()
+# def update_servo(angle):
+#     global sensors
+#     # angle = float(input('Enter angle between 0 & 180: '))
+#     sensors["blinds"]["angle"] = angle
+#     print("The angle of servo motor right now is {} \n".format(sensors["blinds"]["angle"]))
+#     servo()
 
 
 def servo():
@@ -186,25 +188,26 @@ def servo():
         servo_pwm.ChangeDutyCycle(2 + (sensors["blinds"]["angle"] / 18))
 
         time.sleep(0.5)
-        servo_pwm.ChangeDutyCycle(0)
+        servo_pwm.ChangeDutyCycle(0)  # stay in your place
 
         sensors["blinds"]["active"] = True
 
     except:
+        print("Eror on servo")
         sensors["blinds"]["active"] = False
 
 
 
 # we will recieve values in this funtion to update the global variable
 # Note: To turn on the light the status needs to be True
-def update_ext_light(status, intensity):
-    global sensors
-    # status = int(input('Enter the light status: '))
-    # intensity = float(input('Enter the light Intensity: '))
-    sensors["exterior_light"]["on"] = status
-    sensors["exterior_light"]["level"] = intensity
-    print("The status of blue external lights is {} and the intensity is {}\n".format(sensors["exterior_light"]["on"], sensors["inner_light"]["level"]))
-    ext_light()
+# def update_ext_light(status, intensity):
+#     global sensors
+#     # status = int(input('Enter the light status: '))
+#     # intensity = float(input('Enter the light Intensity: '))
+#     sensors["exterior_light"]["on"] = status
+#     sensors["exterior_light"]["level"] = intensity
+#     print("The status of blue external lights is {} and the intensity is {}\n".format(sensors["exterior_light"]["on"], sensors["inner_light"]["level"]))
+#     ext_light()
 
 
 def ext_light():
@@ -220,18 +223,19 @@ def ext_light():
         sensors["exterior_light"]["active"] = True
         
     except:
+        print("Erron on exterior light")
         sensors["exterior_light"]["active"] = False
 
 
-def update_inner_light(status, intensity):
-    # we will recieve values in this funtion to update the global variable
-    global sensors
-    # status = int(input('Enter the white light status: '))
-    # intensity = float(input('Enter the white light Intensity: '))
-    sensors["inner_light"]["on"] = status
-    sensors["inner_light"]["level"] = intensity
-    print("The status of white internal lights is {} and the intensity is {}\n".format(sensors["inner_light"]["on"], sensors["inner_light"]["level"]))
-    inner_light()
+# def update_inner_light(status, intensity):
+#     # we will recieve values in this funtion to update the global variable
+#     global sensors
+#     # status = int(input('Enter the white light status: '))
+#     # intensity = float(input('Enter the white light Intensity: '))
+#     sensors["inner_light"]["on"] = status
+#     sensors["inner_light"]["level"] = intensity
+#     print("The status of white internal lights is {} and the intensity is {}\n".format(sensors["inner_light"]["on"], sensors["inner_light"]["level"]))
+#     inner_light()
 
 
 def inner_light():
@@ -246,7 +250,9 @@ def inner_light():
         sensors["inner_light"]["active"] = True
 
     except:
-            sensors["inner_light"]["active"] = False
+        print("Erron on inner light")
+
+        sensors["inner_light"]["active"] = False
 
 
 def motor():
@@ -311,6 +317,7 @@ def motor():
             sensors["air_conditioner"]["active"] = True
 
         except:  # an error ocurred
+            print("Erron on motor")
             sensors["air_conditioner"]["active"] = False
 
         time.sleep(0.5)  # so it consumes less resources
@@ -331,7 +338,7 @@ def weatherSensor():
                 sensors["humidity"]["active"] = True
                 sensors["temperature"]["active"] = True
             else:
-                print("Sensor failing.")
+                print("Weather sensor failing.")
                 sensors["humidity"]["active"] = False
                 sensors["temperature"]["active"] = False
 
@@ -345,12 +352,19 @@ def signal_handler(sig, frame):
 
 def button_callback():
     global sensors
-    print("You have pressed the button")
     # toggle button (off -> on, on -> off)
-    if not sensors["presence"]["is_detected"]:
-        sensors["presence"]["is_detected"] = True
-    else:
-        sensors["presence"]["is_detected"] = False
+    try:
+        if not sensors["presence"]["is_detected"]:
+            print("Presence detected")
+            sensors["presence"]["is_detected"] = True
+        else:
+            print("Presence undetected")
+            sensors["presence"]["is_detected"] = False
+        
+        sensors["presence"]["active"] = True
+    except:
+        print("Presence sensor failing.")
+        sensors["presence"]["active"] = False
 
 
 def button():
