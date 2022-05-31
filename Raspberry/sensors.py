@@ -417,7 +417,7 @@ def on_message(client, userdata, msg):
         print("air-level command received:", payload)
         sensors["air_conditioner"]["level"] = payload["level"]
     elif topic[-1] == "blinds":
-        print("air-level command received:", payload)
+        print("blinds command received:", payload)
         sensors["blinds"]["level"] = payload["level"]
     elif topic[-1] == "inner-light-mode":
         print("inner-light-mode command received:", payload)
