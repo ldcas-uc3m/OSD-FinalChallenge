@@ -3,7 +3,6 @@ import RPi.GPIO as GPIO
 from threading import Thread
 import paho.mqtt.client as mqtt
 
-# TODO: $ pip freeze -r > requirements.txt
 
 # CONSTANTS
 MOTOR1A = 24
@@ -82,7 +81,7 @@ dc = 0  # AC power
 
 
 # MQTT
-MQTT_SERVER = "34.107.55.203"
+MQTT_SERVER = "34.159.61.163"
 MQTT_PORT = 1884
 MQTT_USER = "dso_server"
 MQTT_PASSWORD = "dso_password"
