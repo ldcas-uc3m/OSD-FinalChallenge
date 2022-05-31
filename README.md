@@ -44,8 +44,8 @@ Regards!
 3. [Execution](#execution)
 4. [Use, debugging & other commands](#use-debugging--other-commands)
     1. [Scaling](#scaling)
-    2. [MariaDB](#mariadb)
-    3. [Adminer](#adminer)
+    2. [MariaDB](#mariadb-1)
+    3. [Adminer](#adminer-1)
     4. [Frontend](#frontend)
 
 
@@ -119,8 +119,7 @@ It does nothing until the button is pressed, that is, until presence is detected
 While there is presence, it reads the temperature and humidity of the room and, depending on the temperature, it turns the motor backwards (pump hot air, if temperature < 21ºC or forwards (pump cold air, if temperature > 24ºC). Using Pulse Width Modulation, the motor is run faster the further away from the limit temperature it is, that is, the hotter it is, the more cold air is pushed. If temperature is between 21ºC and 24ºC, the motor stays on standby.  
 The RGB LED signals the state of the AC: it turs blue if it's in cold mode, red if it's in hot mode, and green if it's in standby.  
 The servo motor is used to control the blinds, from 0º (closed) to 180º (open).  
-The other lights also use PWMs to control the intensity, and can be turned on or off.
-<!-- TODO: describe automatic stuff -->
+The other lights also use PWMs to control the intensity, and can be turned on or off, but they are automatic, and turn on/off at a specific time of day.
 
   
 The raspberry is also able to receive commands from the MQTT-2, which overwrite its state, and are able to control the devices.  
