@@ -274,13 +274,29 @@ def on_message_1884(client, userdata, msg):
     
     elif topic[-1] == "disconn":
         # RPi has disconnected, set all devices to false
-        temperature["active"] = False
-        humidity["active"] = False
-        air["active"] = False
-        in_light["active"] = False
-        ex_light["active"] = False
-        presence["active"] = False
+        json_temperature = json.loads(temperature)
+        json_humidity = json.loads(humidity)
+        json_air = json.loads(air)
+        json_inner_light = json.loads(in_light)
+        json_exterior_light = json.loads(ex_light)
+        json_presence = json.loads(presence)
+        json_blinds = json.loads(blinds)
 
+        json_temperature["active"] = False
+        json_humidity["active"] = False
+        json_air["active"] = False
+        json_blinds["active"] = False
+        json_inner_light["active"] = False
+        json_exterior_light["active"] = False
+        json_presence["active"] = False
+
+        client.publish(TEMPERATURE_TOPIC, payload = json.dumps(json_temperature), qos = 0, retain = False)
+        client.publish(HUMIDITY_TOPIC, payload = json.dumps(json_humidity), qos = 0, retain = False)
+        client.publish(BLINDS_TOPIC, payload = json.dumps(json_blinds), qos = 0, retain = False)
+        client.publish(PRESENCE_TOPIC, payload = json.dumps(json_presence), qos = 0, retain = False)
+        client.publish(PRESENCE_TOPIC, payload = json.dumps(json_air), qos = 0, retain = False)
+        client.publish(IN_LIGHT_TOPIC, payload = json.dumps(json_inner_light), qos = 0, retain = False)
+        client.publish(EX_LIGHT_TOPIC, payload = json.dumps(json_exterior_light), qos = 0, retain = False)
 
 
 # ---
