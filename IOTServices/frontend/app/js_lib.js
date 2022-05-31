@@ -2,7 +2,7 @@
  * Javascript file to implement client side usability for 
  * Operating Systems Desing exercises.
  */
-var backend_api_address = "34.159.252.9"
+var backend_api_address = "34.159.61.163"
 var backend_api_port = "5001"
 
 var backend_url = "http://" + backend_api_address + ":" + backend_api_port + "/device_state"

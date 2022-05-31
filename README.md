@@ -351,7 +351,7 @@ chmod +x launch.sh
 ### Scaling
 This is prepared to be run with only one Raspberry Pie, but it's prepared to be scaled.  
 To do that, you have to do some things:
-1. Each RPi has its room number "hardwired", so the code run on each RPi must be edited manually. To do that, modify the variable `ROOM_ID` in `Raspberry/sensors.py` (set it to `"Room2`, etc.)
+1. Each RPi has its room number "hardwired", so the code run on each RPi must be edited manually. To do that, modify the variable `ROOM_ID` in `Raspberry/sensors.py` (set it to `"Room2"`, etc.)
 2. The number of RPies connected must be updated in `DigitalTwin/docker-compose.yaml`, `NUMBER_RPIES` enviroment variable in `digital_twin`.
 
 Take into account that you can also tune the number of Digital Twins (by default, 4), in `DigitalTwin/launch_instances.sh`. Remember Twins without connected RPies will generate random data.
