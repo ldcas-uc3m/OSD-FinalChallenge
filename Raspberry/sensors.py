@@ -88,12 +88,12 @@ MQTT_PASSWORD = "dso_password"
 
 ROOM_ID = "Room1"
 
-COMMAND_TOPIC = "hotel/rooms/" + ROOM_ID + "/command"
+COMMAND_TOPIC = "hotel/rooms/" + ROOM_ID + "/command/+"
 DISCONN_TOPIC = "hotel/rooms/" + ROOM_ID + "/disconn"
 TELEMETRY_TOPIC = "hotel/rooms/" + ROOM_ID + "/telemetry"
 TEMPERATURE_TOPIC = TELEMETRY_TOPIC + "/temperature"
 HUMIDITY_TOPIC = TELEMETRY_TOPIC + "/humidity"
-AIR_TOPIC = TELEMETRY_TOPIC + "/air-conditioner"
+AIR_TOPIC = TELEMETRY_TOPIC + "/air"
 IN_LIGHT_TOPIC = TELEMETRY_TOPIC + "/inner-light"
 EX_LIGHT_TOPIC = TELEMETRY_TOPIC + "/exterior-light"
 PRESENCE_TOPIC = TELEMETRY_TOPIC + "/presence"
@@ -119,17 +119,21 @@ def threads():
     t_sensor = Thread(target=weatherSensor)
     t_ext_scheduler = Thread(target=ext_schedule)
     t_mqtt = Thread(target=connect_mqtt)
+    t_lights = Thread(target=lights)
 
     t_button.setDaemon(True)
     t_motor.setDaemon(True)
     t_sensor.setDaemon(True)
     t_ext_scheduler.setDaemon(True)
+    t_mqtt.setDaemon(True)
+    t_lights.setDaemon(True)
 
     t_button.start()
     t_motor.start()
     t_sensor.start()
     t_mqtt.start()
     t_ext_scheduler.start()
+    t_lights.start()
 
     # ##solo testing
     # t_blu2 = Thread(target=check)
@@ -141,14 +145,15 @@ def threads():
     t_motor.join()
     t_sensor.join()
     t_mqtt.join()
+    t_lights.join()
 
 
-# def check():
-#     # to be delted only for testing
-#     while True:
-#         #update_servo(0)
-#         update_blu(0,0)
-#         #update_white(0, 0)
+def lights():
+    while True:
+        ext_light()
+        inner_light()
+        time.sleep(1)
+
 def ext_on():
     update_ext_light(1,100)
 def ext_off():
@@ -231,7 +236,6 @@ def update_inner_light(status, intensity):
 
 def inner_light():
     global sensors
-
     try:
         white_pwm.start(0)
         if sensors["inner_light"]["on"]:
