@@ -1,20 +1,23 @@
 # Operating Systems Design: Final Challenge
-By Luis Daniel Casais Mezquida, Iván Darío Cersósimo and Hashim Mahmood  
+By Luis Daniel Casais Mezquida, Iván Darío Cersósimo & Hashim Mahmood  
 Operating Systems Design 21/22  
 Bachelor's Degree in Computer Science and Engineering, grp. 89  
 Universidad Carlos III de Madrid
 
 Implementation of an IOT solution for a Smart Hotel.
 
+<!--
 ## Preface: A note for the teachers
 Hello there!  
   
 We know this is a _big_, _chonky_ README, but it's mainly documentation for the future (so that in like, 10 years, we can look back at this project and not die trying to figure out how everything worked).  
   
 You can read it all, but the parts you're probably more interested in are the [Implementation](#implementation) chapter, that covers how it all works (we changed stuff a bit, and added some other stuff such as the Adminer), the [Rooms Management Microservice](#rooms-management-microservice) and [Data Ingestion microservice/ReST API](#data-ingestion-microservicerest-api) architecture part, and the [Execution](#execution) chapter, mainly steps 3 (setup variables) & 5 (setup RPi).  
-Also maybe check out [Scaling](#scaling) (?).   
+Also maybe check out [Scaling](#scaling) (?).
   
 Regards!
+-->
+
 
 ## Index
 1. [Problem description](#problem-description)
@@ -26,7 +29,7 @@ Regards!
         4. [Message Router](#message-router)
         5. [Data Ingestion microservice/ReST API](#data-ingestion-microservicerest-api)
         6. [Webapp Backend/ReST API](#webapp-backendrest-api)
-        7. [Frontend](#frontend)
+        7. [Website frontend](#website-frontend)
         8. [Rooms Management Microservice](#rooms-management-microservice)
     2. [Implementation](#implementation)
         1. [`raspberry`](#raspberry)
@@ -44,9 +47,9 @@ Regards!
 3. [Execution](#execution)
 4. [Use, debugging & other commands](#use-debugging--other-commands)
     1. [Scaling](#scaling)
-    2. [MariaDB](#mariadb-1)
+    2. [Frontend](#frontend-1)
     3. [Adminer](#adminer-1)
-    4. [Frontend](#frontend)
+    4. [MariaDB](#mariadb-1)
 
 
 ## Problem description
@@ -302,8 +305,12 @@ sudo usermod -aG docker $USER  # not explicitly needed, but recommended
 sudo apt update && sudo apt upgrade
 sudo apt install pip -y
 ```
-3. Copy the IP address of the machine that will hold the IOTServices into `DigitalTwin/docker-compose.yaml` (`MQTT_SERVER_ADDRESS` enviroment variable), into `IOTServices/docker-compose.yaml` (`MESSAGE_ROUTER_API_ADDRESS` in `webapp_backend` enviroment variable), and into the `backend_api_address` variable inside `IOTServices/frontend/app/js_lib.js`.
-4. Make sure port `1883` (MQTT-1) and `1884` (MQTT-2) are open on all machines, and ports `5000` (Data Ingestion ReST API), `5001` (Webapp Backend ReST API), `5002` (Message Router ReST API), `3306` (mariaDB), `8080` (adminer) and `80` (http) are open on the IOTServices machine.
+3. Copy the IP address of the machine that will hold the IOTServices into:
+    1. `MQTT_SERVER_ADDRESS` enviroment variable for `digital_twin` in `DigitalTwin/docker-compose.yaml`
+    2. `MESSAGE_ROUTER_API_ADDRESS` enviroment variable for `webapp_backend` in `IOTServices/docker-compose.yaml`
+    3. `backend_api_address` variable in `IOTServices/frontend/app/js_lib.js`
+    4. `MQTT_SERVER` variable in `Raspberry/sensors.py`
+4. Make sure port `1883` (MQTT-1) and `1884` (MQTT-2) are open on both machines, and ports `5000` (Data Ingestion ReST API), `5001` (Webapp Backend ReST API), `5002` (Message Router ReST API), `3306` (mariaDB), `8080` (adminer) and `80` (http) are open on the IOTServices machine.
 5. Setup the circuit on the Raspberry Pi, as such:  
 
 ![Raspberry Pi circuit diagram](img/RPi_diagram.svg)  
@@ -355,15 +362,8 @@ To do that, you have to do some things:
 
 Take into account that you can also tune the number of Digital Twins (by default, 4), in `DigitalTwin/launch_instances.sh`. Remember Twins without connected RPies will generate random data.
 
-### MariaDB
-- To enter the container, run:
-```bash
-docker exec –it iotservices_mariaDB_1 mysql –u dso_db –pdso_db_password
-```
-- To enter the database, run:
-```sql
-use dso_db;
-```
+### Frontend
+To access the frontend, go to `<IP of the IOTServices machine>`.
 
 ### Adminer
 Adminer is a web interface for MariaDB.
@@ -376,5 +376,12 @@ To access it, go to `<IP of the IOTServices machine>:8080`, and login with:
 
 Note that the credentials are the enviroment variables for mariaDB found on `IOTServices/docker-compose.yaml`.
 
-### Frontend
-To access the frontend, go to `<IP of the IOTServices machine>`.
+### MariaDB
+- To enter the container, run:
+```bash
+docker exec –it iotservices_mariaDB_1 mysql –u dso_db –pdso_db_password
+```
+- To enter the database, run:
+```sql
+use dso_db;
+```

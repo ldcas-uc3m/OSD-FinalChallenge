@@ -35,7 +35,7 @@ GPIO.setup(SERVO_PIN, GPIO.OUT)
 motor_pwm = GPIO.PWM(MOTOR1E, 100)
 blu_pwm = GPIO.PWM(YELLOW_PIN, 100)  # for exterior light
 white_pwm = GPIO.PWM(WHITE_PIN, 100)  # for inner light
-servo_pwm = GPIO.PWM(14, 50)
+servo_pwm = GPIO.PWM(SERVO_PIN, 50)
 
 
 GPIO.setwarnings(False)
@@ -79,6 +79,7 @@ sensors = {
 
 dc = 0  # AC power
 
+is_connected = False
 
 # MQTT
 MQTT_SERVER = "34.159.61.163"
@@ -183,7 +184,7 @@ def servo():
         sensors["blinds"]["active"] = True
 
     except:
-        print("Eror on servo")
+        print("Error on servo")
         sensors["blinds"]["active"] = False
 
 
@@ -240,7 +241,7 @@ def inner_light():
         sensors["inner_light"]["active"] = True
 
     except:
-        print("Erron on inner light")
+        print("Error on inner light")
 
         sensors["inner_light"]["active"] = False
 
@@ -319,20 +320,19 @@ def weatherSensor():
     DHT_SENSOR = Adafruit_DHT.DHT11
 
     while True:
-        if sensors["presence"]["is_detected"]:
-            # read sensor and time
-            sensors["humidity"]["humidity"], sensors["temperature"]["temperature"] = Adafruit_DHT.read_retry(DHT_SENSOR, DHT_PIN)
-            if sensors["humidity"]["humidity"] is not None and sensors["temperature"]["temperature"] is not None:
-                print("Temp={0:0.1f}C".format(sensors["temperature"]["temperature"]))
-                print("Power:", dc)
-                sensors["humidity"]["active"] = True
-                sensors["temperature"]["active"] = True
-            else:
-                print("Weather sensor failing.")
-                sensors["humidity"]["active"] = False
-                sensors["temperature"]["active"] = False
+        # read sensor and time
+        sensors["humidity"]["humidity"], sensors["temperature"]["temperature"] = Adafruit_DHT.read_retry(DHT_SENSOR, DHT_PIN)
+        if sensors["humidity"]["humidity"] is not None and sensors["temperature"]["temperature"] is not None:
+            print("Temp={0:0.1f}C".format(sensors["temperature"]["temperature"]))
+            print("Power:", dc)
+            sensors["humidity"]["active"] = True
+            sensors["temperature"]["active"] = True
+        else:
+            print("Weather sensor failing.")
+            sensors["humidity"]["active"] = False
+            sensors["temperature"]["active"] = False
 
-            time.sleep(3)
+        time.sleep(3)
 
 
 def signal_handler(sig, frame):
@@ -386,6 +386,10 @@ def button():
 # MQTT
 # ---
 def on_connect(client, userdata, flags, rc):
+    global is_connected
+
+    is_connected = True
+
     print("Digital Raspberry connected to MQTT-2")
     client.subscribe(COMMAND_TOPIC)
     print("Subscribed to", COMMAND_TOPIC)
@@ -425,6 +429,10 @@ def on_message(client, userdata, msg):
 
 
 def on_disconnect(client, userdata, rc):
+    global is_connected
+
+    is_connected = False
+
     print("Disconnected from MQTT")
     # set sensors as inactive
     sensors["air_conditioner"]["active"] = False
@@ -470,7 +478,7 @@ def connect_mqtt():
     client.loop_start()  # listen for commands
 
     while True:
-        send_data(client)
+        if is_connected: send_data(client)
 
         time.sleep(5)
 
